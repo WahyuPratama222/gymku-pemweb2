@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id('id_payment');
-            $table->foreignId('id_registration')->constrained('registration', 'id_registration')->onDelete('cascade');
+            $table->foreignId('id_registration')->constrained('registrations', 'id_registration')->onDelete('cascade');
             $table->enum('payment_method', ['Transfer Bank', 'Tunai', 'QRIS', 'E-Wallet']);
-            $table->enum('payment_status', ['Lunas', 'Belum Lunas', 'Gagal'])->default('Belum Lunas');
+            $table->enum('payment_status', ['Paid', 'Unpaid', 'Failed'])->default('Unpaid');
             $table->timestamp('payment_date')->useCurrent();
             $table->decimal('amount', 12, 0);
         });

@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id('id_user');
             $table->string('name', 100);
             $table->string('email', 100)->unique();
-            $table->enum('gender', ['Laki-Laki', 'Wanita'])->nullable();
+            $table->enum('gender', ['Male', 'Female'])->nullable();
             $table->string('password');
             $table->enum('role', ['Member', 'Admin'])->default('Member');
             $table->rememberToken();
@@ -20,7 +20,7 @@ return new class extends Migration {
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index()->constrained('users', 'id_user')->onDelete('cascade');
+            $table->foreignId('id_user')->nullable()->index()->constrained('users', 'id_user')->onDelete('cascade');
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');

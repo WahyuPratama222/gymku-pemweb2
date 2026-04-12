@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('progress', function (Blueprint $table) {
             $table->id('id_progress');
             $table->foreignId('id_user')->constrained('users', 'id_user')->onDelete('cascade');
-            $table->date('record_date');
+            $table->date('record_date')->index();
             $table->decimal('weight', 5, 2)->nullable();
             $table->decimal('height', 5, 2)->nullable();
             $table->decimal('body_fat', 5, 2)->nullable();
