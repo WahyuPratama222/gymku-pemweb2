@@ -20,7 +20,7 @@ return new class extends Migration {
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('id_user')->nullable()->index()->constrained('users', 'id_user')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->index()->constrained('users', 'id_user')->onDelete('cascade');
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');
