@@ -17,11 +17,22 @@ class User extends Authenticatable
 
     protected $table = 'users';
     protected $primaryKey = 'id_user';
+
     protected function casts(): array
     {
         return [
             'password' => 'hashed',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'Admin';
+    }
+
+    public function isMember(): bool
+    {
+        return $this->role === 'Member';
     }
 
     public function progress(): HasMany
