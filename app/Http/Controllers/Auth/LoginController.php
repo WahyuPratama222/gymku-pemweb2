@@ -1,74 +1,85 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
-use App\Models\User;
-use Illuminate\Http\RedirectResponse;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Validator;
 
-class AuthController extends Controller
+class LoginController extends Controller
 {
-    public function showLoginForm(): View
+    /**
+     * Show the login form.
+     */
+    public function showLoginForm()
     {
+        // Redirect if already logged in
+        if (Auth::check()) {
+            return $this->redirectToDashboard();
+        }
+
         return view('auth.login');
     }
 
-    public function login(LoginRequest $request): RedirectResponse
+    /**
+     * Handle login request.
+     */
+    public function login(Request $request)
     {
-        $request->authenticate();
-
-        $request->session()->regenerate();
-
-        return $this->redirectBasedOnRole();
-    }
-
-    public function showRegisterForm(): View
-    {
-        return view('auth.register');
-    }
-
-    public function register(RegisterRequest $request): RedirectResponse
-    {
-        $user = User::create([
-            'name'     => $request->validated('name'),
-            'email'    => $request->validated('email'),
-            'gender'   => $request->validated('gender'),
-            'password' => $request->validated('password'),
-            'role'     => 'Member',
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|min:8',
+        ], [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
         ]);
 
-        Auth::login($user);
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
 
-        $request->session()->regenerate();
+        // Attempt to login
+        $credentials = $request->only('email', 'password');
 
-        return redirect()
-            ->route('member.dashboard')
-            ->with('success', 'Selamat datang di Gymku! Akun kamu berhasil dibuat.');
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+
+            // Redirect based on role
+            return $this->redirectToDashboard();
+        }
+
+        // Login failed
+        return back()->withErrors([
+            'email' => 'Email atau password salah.',
+        ])->withInput();
     }
 
-    public function logout(Request $request): RedirectResponse
+    /**
+     * Handle logout request.
+     */
+    public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Kamu berhasil logout.');
+        return redirect()->route('login')->with('success', 'Anda telah logout.');
     }
 
-    private function redirectBasedOnRole(): RedirectResponse
+    /**
+     * Redirect user to appropriate dashboard based on role.
+     */
+    protected function redirectToDashboard()
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        if ($user->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard'));
+        if (Auth::user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
         }
 
-        return redirect()->intended(route('member.dashboard'));
+        return redirect()->route('member.dashboard');
     }
 }
