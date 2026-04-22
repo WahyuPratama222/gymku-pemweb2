@@ -17,10 +17,21 @@ return new class extends Migration {
             $table->rememberToken();
             $table->timestamps();
         });
+
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            // Penting: user_id harus merujuk ke id_user di tabel users
+            $table->foreignId('user_id')->nullable()->index()->constrained('users', 'id_user')->onDelete('cascade');
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
     }
 
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('sessions');
     }
 };
