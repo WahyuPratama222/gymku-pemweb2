@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('image', 100)->default('default.jpg');
             $table->decimal('price', 12, 0);
             $table->integer('day_duration');
+            $table->boolean('is_premium')->default(false);
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
         });

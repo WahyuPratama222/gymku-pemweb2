@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'image', 'price', 'day_duration', 'status'])]
+#[Fillable(['name', 'image', 'price', 'day_duration', 'is_premium', 'status'])]
 class Package extends Model
 {
     use HasFactory;
@@ -21,6 +21,7 @@ class Package extends Model
         return [
             'price' => 'float',
             'day_duration' => 'integer',
+            'is_premium' => 'boolean',
         ];
     }
 
