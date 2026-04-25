@@ -14,52 +14,76 @@ class ProgressController extends Controller
     /**
      * Display progress tracking page.
      */
-    public function index(Request $request)
-    {
-        $user = Auth::user();
+public function index(Request $request)
+{
+    $user = auth()->user();
 
-        // Handle toggle show all
-        if ($request->input('action') === 'toggle_show_all') {
-            $showAll = session('progress_show_all', false);
-            session(['progress_show_all' => !$showAll]);
-            return redirect()->route('member.progress');
-        }
-
-        // Handle preset comparison change
-        if ($request->input('action') === 'set_compare_preset') {
-            $preset = $request->input('preset', 'all');
-            $allowed = ['week', 'month', 'quarter', 'year', 'all'];
-            if (in_array($preset, $allowed)) {
-                session(['compare_preset' => $preset]);
-            }
-            return redirect()->route('member.progress');
-        }
-
-        // Get all progress records
-        $rows = Progress::where('id_user', $user->id_user)
-            ->latest()
-            ->get();
-
-        // Get preset and show_all from session
-        $preset = session('compare_preset', 'all');
+    // 1. Handle Logika Toggle (Jika ada request action dari form/link)
+    if ($request->input('action') === 'toggle_show_all') {
         $showAll = session('progress_show_all', false);
+        session(['progress_show_all' => !$showAll]);
+        return redirect()->route('member.progress');
+    }
 
-        // Calculate latest and baseline for comparison
-        $latest = null;
-        $baseline = null;
+    if ($request->input('action') === 'set_compare_preset') {
+        $preset = $request->input('preset', 'all');
+        $allowed = ['week', 'month', 'quarter', 'year', 'all'];
+        if (in_array($preset, $allowed)) {
+            session(['compare_preset' => $preset]);
+        }
+        return redirect()->route('member.progress');
+    }
 
-        if ($rows->isNotEmpty()) {
-            $latest = $rows->first();
-            $baseline = $this->getBaselineForComparison($rows, $preset);
+    // 2. Ambil data utama (Hanya 1 Query untuk mencegah duplikasi)
+    $rows = Progress::where('id_user', $user->id_user)
+        ->latest() // Ini sama dengan orderBy('created_at', 'desc')
+        ->get();
+
+    // 3. Ambil status dari Session atau Query String
+    $preset = session('compare_preset', 'all');
+    // Cek session dulu, kalau kosong cek query string 'showAll'
+    $showAll = session('progress_show_all', $request->query('showAll', false));
+
+    // 4. Hitung Latest dan Baseline untuk Comparison agar Blade tidak error
+    $latest = null;
+    $baseline = null;
+
+    if ($rows->isNotEmpty()) {
+        $latest = $rows->first();
+        // Memanggil fungsi helper untuk mencari data pembanding
+        $baseline = $this->getBaselineForComparison($rows, $preset);
+    }
+
+    // 5. Kirim semua variabel ke View
+    return view('member.progress', compact(
+        'rows',
+        'latest',
+        'baseline',
+        'preset',
+        'showAll'
+    ));
+}
+
+// JANGAN LUPA: Tambahkan fungsi ini di bawah index() tapi masih di dalam class
+    private function getBaselineForComparison($rows, $preset)
+    {
+        if ($rows->isEmpty()) return null;
+
+        $latestDate = \Carbon\Carbon::parse($rows->first()->created_at);
+
+        $compareDate = match ($preset) {
+            'week'    => $latestDate->copy()->subWeek(),
+            'month'   => $latestDate->copy()->subMonth(),
+            'quarter' => $latestDate->copy()->subMonths(3),
+            'year'    => $latestDate->copy()->subYear(),
+            default   => null,
+        };
+
+        if ($compareDate) {
+            return $rows->first(fn($row) => \Carbon\Carbon::parse($row->created_at)->lte($compareDate)) ?: $rows->last();
         }
 
-        return view('member.progress', compact(
-            'rows',
-            'latest',
-            'baseline',
-            'preset',
-            'showAll'
-        ));
+        return $rows->last(); // Preset 'all' mengambil data tertua
     }
 
     /**
@@ -176,39 +200,4 @@ class ProgressController extends Controller
     /**
      * Get baseline progress for comparison based on preset.
      */
-    protected function getBaselineForComparison($rows, $preset)
-    {
-        if ($preset === 'all') {
-            return $rows->last();
-        }
-
-        $latest = $rows->first();
-        $targetDate = null;
-
-        switch ($preset) {
-            case 'week':
-                $targetDate = Carbon::parse($latest->record_date)->subDays(7);
-                break;
-            case 'month':
-                $targetDate = Carbon::parse($latest->record_date)->subMonth();
-                break;
-            case 'quarter':
-                $targetDate = Carbon::parse($latest->record_date)->subMonths(3);
-                break;
-            case 'year':
-                $targetDate = Carbon::parse($latest->record_date)->subYear();
-                break;
-        }
-
-        if ($targetDate) {
-            // Find closest record to target date
-            $baseline = $rows->first(function ($row) use ($targetDate) {
-                return Carbon::parse($row->record_date)->lte($targetDate);
-            });
-
-            return $baseline ?: $rows->last();
-        }
-
-        return $rows->last();
-    }
 }
