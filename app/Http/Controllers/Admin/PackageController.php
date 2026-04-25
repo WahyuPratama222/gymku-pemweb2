@@ -30,7 +30,7 @@ class PackageController extends Controller
             'name' => 'required|string|max:100',
             'price' => 'required|numeric|min:0',
             'day_duration' => 'required|integer|min:1',
-            'status' => 'required|in:Aktif,Nonaktif',
+            'status' => 'required|in:Active,Inactive',
         ], [
             'name.required' => 'Nama paket wajib diisi.',
             'price.required' => 'Harga wajib diisi.',
@@ -69,7 +69,7 @@ class PackageController extends Controller
             'name' => 'required|string|max:100',
             'price' => 'required|numeric|min:0',
             'day_duration' => 'required|integer|min:1',
-            'status' => 'required|in:Aktif,Nonaktif',
+            'status' => 'required|in:Active,Inactive',
         ], [
             'name.required' => 'Nama paket wajib diisi.',
             'price.required' => 'Harga wajib diisi.',

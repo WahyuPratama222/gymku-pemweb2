@@ -37,9 +37,9 @@ class DashboardController extends Controller
 
         return [
             'total_members' => User::where('role', 'Member')->count(),
-            'active_memberships' => Registration::where('status', 'active')->count(),
-            'expired_memberships' => Registration::where('status', 'expired')->count(),
-            'active_packages' => Package::where('status', 'Aktif')->count(),
+            'active_memberships' => Registration::where('status', 'Active')->count(),
+            'expired_memberships' => Registration::where('status', 'Expired')->count(),
+            'active_packages' => Package::where('status', 'Active')->count(),
             'income_today' => Payment::paid()
                 ->whereDate('payment_date', $today)
                 ->sum('amount'),
