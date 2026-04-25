@@ -17,10 +17,10 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Get active membership
+        // Get active membership (sesuai enum di migration: 'Active')
         $activeMembership = Registration::with('package')
             ->where('id_user', $user->id_user)
-            ->where('status', 'active')
+            ->where('status', 'Active')
             ->latest('registration_date')
             ->first();
 

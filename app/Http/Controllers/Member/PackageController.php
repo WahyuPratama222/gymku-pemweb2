@@ -19,6 +19,7 @@ class PackageController extends Controller
      */
     public function index()
     {
+        // Menggunakan scope active() yang sudah diperbaiki di model
         $packages = Package::active()->orderBy('price', 'asc')->get();
 
         return view('member.packages', compact('packages'));
@@ -33,9 +34,9 @@ class PackageController extends Controller
         $packageId = $request->get('id');
         $extraDays = (int) $request->get('extra_days', 0);
 
-        // Get package
+        // Get package (sesuai enum di migration: 'Active')
         $package = Package::where('id_package', $packageId)
-            ->where('status', 'Aktif')
+            ->where('status', 'Active')
             ->firstOrFail();
 
         // Calculate totals
@@ -43,9 +44,9 @@ class PackageController extends Controller
         $totalDays = $package->day_duration + $extraDays;
         $totalPrice = $package->price + ($extraDays * $pricePerDay);
 
-        // Check if user already has active membership
+        // Check if user already has active membership (sesuai enum di migration: 'Active')
         $hasActiveMembership = Registration::where('id_user', $user->id_user)
-            ->where('status', 'active')
+            ->where('status', 'Active')
             ->exists();
 
         if ($hasActiveMembership) {
@@ -96,13 +97,13 @@ class PackageController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create registration
+            // Create registration (sesuai enum di migration: 'Pending')
             $registration = Registration::create([
                 'id_user' => $user->id_user,
                 'id_package' => $package->id_package,
                 'start_date' => $startDate,
                 'expiry_date' => $expiryDate,
-                'status' => 'pending',
+                'status' => 'Pending',
             ]);
 
             // Create payment
