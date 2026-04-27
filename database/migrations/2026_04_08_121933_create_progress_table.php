@@ -17,10 +17,6 @@ return new class extends Migration
             $table->decimal('height', 5, 2)->nullable();
             $table->decimal('body_fat', 5, 2)->nullable();
             $table->decimal('muscle_mass', 5, 2)->nullable();
-            $table->decimal('chest', 5, 2)->nullable();
-            $table->decimal('waist', 5, 2)->nullable();
-            $table->decimal('biceps', 5, 2)->nullable();
-            $table->decimal('thigh', 5, 2)->nullable();
             $table->timestamp('created_at')->useCurrent();
         });
     }
