@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-#[Fillable(['id_user', 'record_date', 'weight', 'height', 'body_fat', 'muscle_mass', 'chest', 'waist', 'biceps', 'thigh'])]
+#[Fillable(['id_user', 'record_date', 'weight', 'height', 'body_fat', 'muscle_mass'])]
 class Progress extends Model
 {
     use HasFactory;
@@ -23,10 +23,6 @@ class Progress extends Model
             'height' => 'float',
             'body_fat' => 'float',
             'muscle_mass' => 'float',
-            'chest' => 'float',
-            'waist' => 'float',
-            'biceps' => 'float',
-            'thigh' => 'float',
         ];
     }
 
