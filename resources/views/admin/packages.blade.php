@@ -46,7 +46,7 @@
                                     <div class="fw-bold fs-6">{{ $p->name }}</div>
                                     <div class="small text-white-50">{{ $p->day_duration }} Hari</div>
                                 </div>
-                                @if ($p->status === 'Aktif')
+                                @if ($p->status === 'Active')
                                     <span class="badge bg-success">Aktif</span>
                                 @else
                                     <span class="badge bg-secondary">Nonaktif</span>
@@ -62,7 +62,7 @@
                                     data-bs-toggle="modal" data-bs-target="#modalEdit{{ $p->id_package }}">
                                     <i class="bi bi-pencil me-1"></i>Edit
                                 </button>
-                                <form action="{{ route('admin.packages.destroy', $p->id_package) }}" method="POST" 
+                                <form action="{{ route('admin.packages.destroy', $p->id_package) }}" method="POST"
                                     onsubmit="return confirm('Hapus paket ini?')">
                                     @csrf
                                     @method('DELETE')
@@ -107,8 +107,8 @@
                                     <div class="mb-3">
                                         <label class="form-label text-warning small">Status</label>
                                         <select name="status" class="form-select bg-dark text-white border-secondary">
-                                            <option value="Aktif" {{ $p->status === 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                                            <option value="Nonaktif" {{ $p->status === 'Nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                            <option value="Active" {{ $p->status === 'Active' ? 'selected' : '' }}>Aktif</option>
+                                            <option value="Inactive" {{ $p->status === 'Inactive' ? 'selected' : '' }}>Nonaktif</option>
                                         </select>
                                     </div>
                                 </div>
@@ -154,8 +154,8 @@
                         <div class="mb-3">
                             <label class="form-label text-warning small">Status</label>
                             <select name="status" class="form-select bg-dark text-white border-secondary">
-                                <option value="Aktif">Aktif</option>
-                                <option value="Nonaktif">Nonaktif</option>
+                                <option value="Active">Aktif</option>
+                                <option value="Inactive">Nonaktif</option>
                             </select>
                         </div>
                     </div>

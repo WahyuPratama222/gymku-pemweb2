@@ -25,7 +25,7 @@ class ProgressController extends Controller
 
         // Ambil status show all dari query string
         $showAll = $request->query('showAll', false);
-        
+
         // Ambil preset comparison dari query string, default 'all'
         $preset = $request->query('preset', 'all');
 
@@ -79,11 +79,10 @@ class ProgressController extends Controller
     {
         $user = Auth::user();
 
-        // Validate input
         $validator = Validator::make($request->all(), [
             'record_date' => 'required|date',
             'weight' => 'required|numeric|min:0|max:500',
-            'height' => 'nullable|numeric|min:0|max:300',
+            'height' => 'required|numeric|min:0|max:300',
             'body_fat' => 'nullable|numeric|min:0|max:100',
             'muscle_mass' => 'nullable|numeric|min:0|max:500',
         ], [
@@ -92,6 +91,10 @@ class ProgressController extends Controller
             'weight.numeric' => 'Berat badan harus berupa angka.',
             'weight.min' => 'Berat badan tidak boleh negatif.',
             'weight.max' => 'Berat badan maksimal 500 kg.',
+            'height.required' => 'Tinggi badan wajib diisi.',
+            'height.numeric' => 'Tinggi badan harus berupa angka.',
+            'height.min' => 'Tinggi badan tidak boleh negatif.',
+            'height.max' => 'Tinggi badan maksimal 300 cm.',
         ]);
 
         if ($validator->fails()) {

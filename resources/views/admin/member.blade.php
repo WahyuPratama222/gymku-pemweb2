@@ -30,32 +30,32 @@
                 </div>
             </div>
         @else
-            @foreach ($members as $m)
-                @php
-                    $hasMembership = !empty($m->id_registration);
-                    $status = $m->status ?? null;
-                    $genderIcon = $m->gender === 'Laki-Laki' ? 'bi-gender-male' : 'bi-gender-female';
-                    $genderColor = $m->gender === 'Laki-Laki' ? 'text-info' : 'text-danger';
-                    
-                    // Hitung hari tersisa
-                    $daysRemaining = null;
-                    if ($hasMembership && $status === 'active' && $m->expiry_date) {
-                        $today = \Carbon\Carbon::today();
-                        $expiry = \Carbon\Carbon::parse($m->expiry_date);
-                        $daysRemaining = $today->diffInDays($expiry, false);
-                        $daysRemaining = $daysRemaining < 0 ? 0 : $daysRemaining;
-                    }
-                    
-                    // Status badge class
-                    $statusBadgeClass = match($status) {
-                        'active' => 'bg-success',
-                        'expired' => 'bg-danger',
-                        'pending' => 'bg-warning text-dark',
-                        'cancelled' => 'bg-secondary',
-                        default => 'bg-secondary'
-                    };
-                @endphp
-                
+        @foreach ($members as $m)
+            @php
+                $hasMembership = !empty($m->id_registration);
+                $status = $m->status ?? null;  // ❌ SUDAH BENAR - dari database
+                $genderIcon = $m->gender === 'Laki-Laki' ? 'bi-gender-male' : 'bi-gender-female';
+                $genderColor = $m->gender === 'Laki-Laki' ? 'text-info' : 'text-danger';
+
+                // Hitung hari tersisa
+                $daysRemaining = null;
+                if ($hasMembership && $status === 'Active' && $m->expiry_date) {
+                    $today = \Carbon\Carbon::today();
+                    $expiry = \Carbon\Carbon::parse($m->expiry_date);
+                    $daysRemaining = $today->diffInDays($expiry, false);
+                    $daysRemaining = $daysRemaining < 0 ? 0 : $daysRemaining;
+                }
+
+                // Status badge class
+                $statusBadgeClass = match($status) {
+                    'Active' => 'bg-success',
+                    'Expired' => 'bg-danger',
+                    'Pending' => 'bg-warning text-dark',
+                    'Cancelled' => 'bg-secondary',
+                    default => 'bg-secondary'
+                };
+            @endphp
+
                 <div class="card bg-secondary bg-opacity-10 border border-secondary text-white">
                     <div class="card-body">
                         <div class="d-flex align-items-center gap-4 flex-wrap">
@@ -114,7 +114,7 @@
 
                             <!-- Hari Tersisa -->
                             <div style="min-width: 80px;" class="text-center">
-                                @if ($status === 'active' && $daysRemaining !== null)
+                                @if ($status === 'Active' && $daysRemaining !== null)
                                     <div class="fs-5 fw-bold {{ $daysRemaining <= 7 ? 'text-danger' : 'text-success' }}">
                                         {{ $daysRemaining }}
                                     </div>
@@ -131,10 +131,10 @@
                                 @else
                                     <span class="badge {{ $statusBadgeClass }}">
                                         @switch($status)
-                                            @case('active') Aktif @break
-                                            @case('expired') Expired @break
-                                            @case('pending') Pending @break
-                                            @case('cancelled') Dibatalkan @break
+                                            @case('Active') Aktif @break
+                                            @case('Expired') Expired @break
+                                            @case('Pending') Pending @break
+                                            @case('Cancelled') Dibatalkan @break
                                             @default {{ $status }}
                                         @endswitch
                                     </span>

@@ -40,10 +40,11 @@
                     <div class="fw-semibold text-warning">
                         <i class="bi bi-graph-up me-2"></i>Visualisasi Progress
                     </div>
-                    
+
                     <div class="d-flex align-items-center gap-2">
                         <select id="chartMetric" class="form-select form-select-sm bg-dark text-light border-secondary" style="min-width: 150px;">
                             <option value="weight">Berat Badan (kg)</option>
+                            <option value="height">Tinggi Badan (cm)</option>
                             <option value="body_fat">Body Fat (%)</option>
                             <option value="muscle_mass">Muscle Mass (kg)</option>
                         </select>
@@ -81,15 +82,15 @@
                         <div class="d-flex align-items-center gap-2">
                             <span class="small text-white-50">Bandingkan:</span>
                             <div class="btn-group" role="group">
-                                <a href="{{ route('member.progress', ['preset' => 'week']) }}" 
+                                <a href="{{ route('member.progress', ['preset' => 'week']) }}"
                                    class="btn btn-sm {{ $preset === 'week' ? 'btn-warning text-dark' : 'btn-outline-warning' }}">
                                     Week
                                 </a>
-                                <a href="{{ route('member.progress', ['preset' => 'month']) }}" 
+                                <a href="{{ route('member.progress', ['preset' => 'month']) }}"
                                    class="btn btn-sm {{ $preset === 'month' ? 'btn-warning text-dark' : 'btn-outline-warning' }}">
                                     Month
                                 </a>
-                                <a href="{{ route('member.progress', ['preset' => 'all']) }}" 
+                                <a href="{{ route('member.progress', ['preset' => 'all']) }}"
                                    class="btn btn-sm {{ $preset === 'all' ? 'btn-warning text-dark' : 'btn-outline-warning' }}">
                                     All Time
                                 </a>
@@ -100,6 +101,7 @@
                     @php
                         $metrics = [
                             ['key' => 'weight', 'label' => 'Berat Badan', 'unit' => 'kg', 'icon' => 'bi-speedometer2'],
+                            ['key' => 'height', 'label' => 'Tinggi Badan', 'unit' => 'cm', 'icon' => 'bi-arrows-vertical'],
                             ['key' => 'body_fat', 'label' => 'Body Fat', 'unit' => '%', 'icon' => 'bi-droplet-fill'],
                             ['key' => 'muscle_mass', 'label' => 'Muscle Mass', 'unit' => 'kg', 'icon' => 'bi-lightning-fill'],
                         ];
@@ -111,7 +113,7 @@
                                 $newVal = $latest->{$m['key']};
                                 $oldVal = $baseline->{$m['key']};
                                 $delta = ($newVal && $oldVal) ? $newVal - $oldVal : null;
-                                
+
                                 $textClass = 'text-light';
                                 $bgClass = 'bg-secondary';
                                 if ($delta > 0) {
@@ -121,11 +123,11 @@
                                     $textClass = 'text-danger';
                                     $bgClass = 'bg-danger';
                                 }
-                                
+
                                 $formattedDelta = $delta !== null ? ($delta > 0 ? '+' : '') . number_format($delta, 1) . ' ' . $m['unit'] : '-';
                             @endphp
 
-                            <div class="col-6 col-md-4">
+                            <div class="col-6 col-md-3">
                                 <div class="text-center p-3 rounded bg-dark bg-opacity-25 border border-secondary border-opacity-50">
                                     <div class="mb-2">
                                         <i class="bi {{ $m['icon'] }} text-warning fs-5"></i>
@@ -133,8 +135,8 @@
                                     <div class="small text-white-50 mb-2">{{ $m['label'] }}</div>
                                     <div class="h5 fw-bold {{ $textClass }} mb-1">{{ $formattedDelta }}</div>
                                     <div class="small text-white-50" style="font-size: 0.75rem;">
-                                        {{ $oldVal ? number_format($oldVal, 1) : '-' }} 
-                                        <i class="bi bi-chevron-right mx-1"></i> 
+                                        {{ $oldVal ? number_format($oldVal, 1) : '-' }}
+                                        <i class="bi bi-chevron-right mx-1"></i>
                                         {{ $newVal ? number_format($newVal, 1) : '-' }}
                                     </div>
                                 </div>
@@ -159,6 +161,7 @@
                     <tr>
                         <th class="text-warning">Tanggal</th>
                         <th class="text-warning">Berat (kg)</th>
+                        <th class="text-warning">Tinggi (cm)</th>
                         <th class="text-warning">Body Fat (%)</th>
                         <th class="text-warning">Muscle Mass (kg)</th>
                         <th class="text-warning text-end">Aksi</th>
@@ -173,16 +176,15 @@
                         <tr>
                             <td>
                                 <div class="fw-semibold">{{ \Carbon\Carbon::parse($r->record_date)->format('d M Y') }}</div>
-                                <div class="small text-white-50">{{ \Carbon\Carbon::parse($r->created_at)->diffForHumans() }}</div>
-                            </td>
                             <td>
                                 <span class="badge bg-warning text-dark">{{ number_format($r->weight, 1) }} kg</span>
                             </td>
+                            <td>{{ $r->height ? number_format($r->height, 1) . ' cm' : '-' }}</td>
                             <td>{{ $r->body_fat ? number_format($r->body_fat, 1) . '%' : '-' }}</td>
                             <td>{{ $r->muscle_mass ? number_format($r->muscle_mass, 1) . ' kg' : '-' }}</td>
                             <td class="text-end">
-                                <button class="btn btn-sm btn-outline-danger" 
-                                        data-bs-toggle="modal" 
+                                <button class="btn btn-sm btn-outline-danger"
+                                        data-bs-toggle="modal"
                                         data-bs-target="#modalDelete{{ $r->id_progress }}"
                                         title="Hapus data ini">
                                     <i class="bi bi-trash"></i>
@@ -191,7 +193,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5">
+                            <td colspan="6" class="text-center py-5">
                                 <div class="text-white-50">
                                     <i class="bi bi-emoji-smile d-block mb-2" style="font-size: 2rem;"></i>
                                     <p class="mb-0">Belum ada data progress.</p>
@@ -206,7 +208,7 @@
 
         @if($allRows->count() > 5)
             <div class="card-footer text-center border-secondary bg-secondary bg-opacity-10">
-                <a href="{{ route('member.progress', ['showAll' => !$showAll]) }}" 
+                <a href="{{ route('member.progress', ['showAll' => !$showAll]) }}"
                    class="btn btn-link text-warning text-decoration-none">
                     {{ $showAll ? 'Tampilkan Lebih Sedikit' : 'Lihat Semua Riwayat (' . $allRows->count() . ')' }}
                 </a>
@@ -236,34 +238,43 @@
                         <label class="form-label text-white-50">
                             <i class="bi bi-calendar3 me-1"></i>Tanggal
                         </label>
-                        <input type="date" name="record_date" value="{{ date('Y-m-d') }}" 
+                        <input type="date" name="record_date" value="{{ date('Y-m-d') }}"
                                class="form-control bg-dark text-white border-secondary" required>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label text-white-50">
                             <i class="bi bi-speedometer2 me-1"></i>Berat Badan (kg) <span class="text-danger">*</span>
                         </label>
-                        <input type="number" step="0.1" name="weight" 
-                               class="form-control bg-dark text-white border-secondary" 
+                        <input type="number" step="0.1" name="weight"
+                               class="form-control bg-dark text-white border-secondary"
                                required placeholder="Contoh: 70.5">
                     </div>
-                    
+
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">
+                            <i class="bi bi-arrows-vertical me-1"></i>Tinggi Badan (cm) <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" step="0.1" name="height"
+                            class="form-control bg-dark text-white border-secondary"
+                            required placeholder="Contoh: 170.5">
+                    </div>
+
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label text-white-50">
                                 <i class="bi bi-droplet-fill me-1"></i>Body Fat (%)
                             </label>
-                            <input type="number" step="0.1" name="body_fat" 
-                                   class="form-control bg-dark text-white border-secondary" 
+                            <input type="number" step="0.1" name="body_fat"
+                                   class="form-control bg-dark text-white border-secondary"
                                    placeholder="Opsional">
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label text-white-50">
                                 <i class="bi bi-lightning-fill me-1"></i>Muscle Mass (kg)
                             </label>
-                            <input type="number" step="0.1" name="muscle_mass" 
-                                   class="form-control bg-dark text-white border-secondary" 
+                            <input type="number" step="0.1" name="muscle_mass"
+                                   class="form-control bg-dark text-white border-secondary"
                                    placeholder="Opsional">
                         </div>
                     </div>
@@ -317,7 +328,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const rawData = @json($allRows ?? []);
-    
+
     if (rawData.length === 0) {
         console.log('Tidak ada data untuk chart');
         return;
@@ -325,16 +336,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Sort data by record_date ascending untuk chart
     const chartData = [...rawData].sort((a, b) => new Date(a.record_date) - new Date(b.record_date));
-    
+
     const ctx = document.getElementById('progressChart');
     if (!ctx) {
         console.error('Canvas element not found');
         return;
     }
-    
+
     const metricSelect = document.getElementById('chartMetric');
     const timeSelect = document.getElementById('chartTime');
-    
+
     let progressChart;
 
     function updateChart() {
@@ -343,18 +354,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const timeScale = timeSelect.value;
 
         let filteredData = chartData;
-        
+
         // Filter berdasarkan time scale
         if (timeScale !== 'all') {
             const now = new Date();
             let cutoff = new Date();
-            
+
             if (timeScale === 'week') {
                 cutoff.setDate(now.getDate() - 7);
             } else if (timeScale === 'month') {
                 cutoff.setMonth(now.getMonth() - 1);
             }
-            
+
             filteredData = chartData.filter(item => new Date(item.record_date) >= cutoff);
         }
 
@@ -363,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const d = new Date(item.record_date);
             return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
         });
-        
+
         const dataPoints = filteredData.map(item => parseFloat(item[metric]) || 0);
 
         // Destroy previous chart
@@ -443,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial chart render
     updateChart();
-    
+
     // Update chart on select change
     metricSelect.addEventListener('change', updateChart);
     timeSelect.addEventListener('change', updateChart);
