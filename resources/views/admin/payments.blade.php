@@ -7,8 +7,8 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="text-warning fw-bold mb-0">Data Pembayaran</h4>
-            <small class="text-white-50">Melihat data pembayaran member</small>
+            <h4 class="text-danger fw-bold mb-0">Data Pembayaran</h4>
+            <small class="text-muted">Melihat data pembayaran member</small>
         </div>
     </div>
 
@@ -27,67 +27,72 @@
     @endphp
 
     <div class="row g-3 mb-4">
+
         <div class="col-sm-6 col-xl-3">
-            <div class="card bg-secondary bg-opacity-10 border border-secondary text-white">
+            <div class="card bg-white border-0 shadow-sm text-dark">
                 <div class="card-body d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-3 bg-primary bg-opacity-25">
-                        <i class="bi bi-receipt fs-4 text-primary"></i>
-                    </div>
-                    <div>
-                        <div class="fs-4 fw-bold">{{ $total }}</div>
-                        <div class="small text-white-50">Total Transaksi</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card bg-secondary bg-opacity-10 border border-secondary text-white">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-3 bg-warning bg-opacity-25">
-                        <i class="bi bi-hourglass-split fs-4 text-warning"></i>
-                    </div>
-                    <div>
-                        <div class="fs-4 fw-bold">{{ $belum }}</div>
-                        <div class="small text-white-50">Belum Lunas</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card bg-secondary bg-opacity-10 border border-secondary text-white">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-3 bg-success bg-opacity-25">
-                        <i class="bi bi-check-circle fs-4 text-success"></i>
-                    </div>
-                    <div>
-                        <div class="fs-4 fw-bold">{{ $lunas }}</div>
-                        <div class="small text-white-50">Lunas</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card bg-secondary bg-opacity-10 border border-secondary text-white">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-3 bg-info bg-opacity-25">
+                    <div class="p-3 rounded-3 bg-info bg-opacity-10">
                         <i class="bi bi-cash-stack fs-4 text-info"></i>
                     </div>
                     <div>
                         <div class="fw-bold" style="font-size:1rem;">
                             Rp {{ number_format($totalNominal, 0, ',', '.') }}
                         </div>
-                        <div class="small text-white-50">Total Pemasukan</div>
+                        <div class="small text-muted">Total Pemasukan</div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card bg-white border-0 shadow-sm text-dark">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 rounded-3 bg-primary bg-opacity-10">
+                        <i class="bi bi-receipt fs-4 text-primary"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold">{{ $total }}</div>
+                        <div class="small text-muted">Total Transaksi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card bg-white border-0 shadow-sm text-dark">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 rounded-3 bg-success bg-opacity-10">
+                        <i class="bi bi-check-circle fs-4 text-success"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold">{{ $lunas }}</div>
+                        <div class="small text-muted">Lunas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card bg-white border-0 shadow-sm text-dark">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 rounded-3 bg-danger bg-opacity-10">
+                        <i class="bi bi-hourglass-split fs-4 text-danger"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold">{{ $belum }}</div>
+                        <div class="small text-muted">Belum Lunas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="card bg-secondary bg-opacity-10 border border-secondary text-white">
+    <div class="card bg-white border-0 shadow-sm text-dark">
         <div class="card-body px-4 py-2">
 
             @if (empty($payments) || count($payments) == 0)
-                <div class="text-center py-5 text-white-50">
+                <div class="text-center py-5 text-muted">
                     <i class="bi bi-receipt fs-1 d-block mb-2"></i>
                     Belum ada data pembayaran.
                 </div>
@@ -102,30 +107,30 @@
                             default => 'bi-credit-card'
                         };
                     @endphp
-                    <div class="d-flex align-items-center gap-4 py-3 {{ $index < count($payments) - 1 ? 'border-bottom border-secondary' : '' }}">
+                    <div class="d-flex align-items-center gap-4 py-3 {{ $index < count($payments) - 1 ? 'border-bottom' : '' }}">
 
                         <div style="min-width: 200px;" class="d-flex align-items-center gap-2">
-                            <span class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                            <span class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
                                 style="width:30px;height:30px;font-size:.75rem;">
                                 {{ strtoupper(substr($p->member_name, 0, 1)) }}
                             </span>
                             <div>
                                 <div class="fw-semibold small">{{ $p->member_name }}</div>
-                                <div class="text-white-50" style="font-size:.72rem;">{{ $p->member_email }}</div>
+                                <div class="text-muted" style="font-size:.72rem;">{{ $p->member_email }}</div>
                             </div>
                         </div>
 
                         <div style="min-width: 130px;">
-                            <span class="badge bg-warning text-dark">{{ $p->package_name }}</span>
+                            <span class="badge bg-light text-danger border border-danger border-opacity-25">{{ $p->package_name }}</span>
                         </div>
 
                         <div style="min-width: 110px;">
-                            <span class="small fw-bold text-warning">Rp {{ number_format($p->amount, 0, ',', '.') }}</span>
+                            <span class="small fw-bold text-danger">Rp {{ number_format($p->amount, 0, ',', '.') }}</span>
                         </div>
 
                         <div class="flex-grow-1">
-                            <div class="small text-white"><i class="bi {{ $methodIcon }} me-1"></i>{{ $p->payment_method }}</div>
-                            <div class="text-white-50" style="font-size:.72rem;">
+                            <div class="small text-dark"><i class="bi {{ $methodIcon }} me-1 text-muted"></i>{{ $p->payment_method }}</div>
+                            <div class="text-muted" style="font-size:.72rem;">
                                 {{ \Carbon\Carbon::parse($p->payment_date)->translatedFormat('d M Y') }}
                             </div>
                         </div>
@@ -134,18 +139,18 @@
                             @if ($p->payment_status === 'Lunas')
                                 <span class="badge bg-success">Lunas</span>
                             @else
-                                <span class="badge bg-warning text-dark">Belum Lunas</span>
+                                <span class="badge bg-danger">Belum Lunas</span>
                             @endif
                         </div>
 
                         <div style="min-width: 110px;" class="text-end">
                             @if ($p->payment_status === 'Belum Lunas')
-                                <button class="btn btn-success btn-sm" data-bs-toggle="modal" 
+                                <button class="btn btn-success btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#modalKonfirmasi{{ $p->id_payment }}">
                                     <i class="bi bi-check-lg me-1"></i>Konfirmasi
                                 </button>
                             @else
-                                <span class="text-white-50 small">—</span>
+                                <span class="text-muted small">—</span>
                             @endif
                         </div>
 
@@ -154,27 +159,27 @@
                     @if ($p->payment_status === 'Belum Lunas')
                     <div class="modal fade" id="modalKonfirmasi{{ $p->id_payment }}" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content bg-dark border border-secondary text-white">
-                                <div class="modal-header border-secondary">
+                            <div class="modal-content bg-white border-0 text-dark">
+                                <div class="modal-header border-light">
                                     <h6 class="modal-title fw-bold">
                                         <i class="bi bi-check-circle text-success me-2"></i>Konfirmasi Pembayaran
                                     </h6>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p class="text-white-50 small mb-3">Pastikan bukti pembayaran sudah diverifikasi sebelum konfirmasi.</p>
-                                    <div class="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary d-flex flex-column gap-2">
+                                    <p class="text-muted small mb-3">Pastikan bukti pembayaran sudah diverifikasi sebelum konfirmasi.</p>
+                                    <div class="p-3 rounded-3 bg-light border d-flex flex-column gap-2">
                                         <div class="d-flex justify-content-between">
-                                            <span class="text-white-50 small">Member</span>
+                                            <span class="text-muted small">Member</span>
                                             <span class="small fw-semibold">{{ $p->member_name }}</span>
                                         </div>
                                         <div class="d-flex justify-content-between">
-                                            <span class="text-white-50 small">Paket</span>
+                                            <span class="text-muted small">Paket</span>
                                             <span class="small fw-semibold">{{ $p->package_name }}</span>
                                         </div>
                                         <div class="d-flex justify-content-between">
-                                            <span class="text-white-50 small">Nominal</span>
-                                            <span class="small fw-bold text-warning">Rp {{ number_format($p->amount, 0, ',', '.') }}</span>
+                                            <span class="text-muted small">Nominal</span>
+                                            <span class="small fw-bold text-danger">Rp {{ number_format($p->amount, 0, ',', '.') }}</span>
                                         </div>
                                     </div>
                                     <div class="mt-3 p-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25">
@@ -184,8 +189,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="modal-footer border-secondary">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                                <div class="modal-footer border-light">
+                                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Batal</button>
                                     <form method="POST" action="{{ route('admin.payments.confirm', $p->id_payment) }}">
                                         @csrf
                                         <button type="submit" class="btn btn-success btn-sm">

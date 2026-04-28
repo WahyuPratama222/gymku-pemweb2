@@ -7,23 +7,20 @@
     <div class="row justify-content-center">
         <div class="col-md-5 col-lg-4">
 
-            <!-- Logo -->
             <div class="text-center mb-4">
-                <i class="bi bi-trophy-fill text-warning" style="font-size: 2.5rem;"></i>
-                <h4 class="text-white fw-bold mt-2">Masuk ke <span class="text-warning">Gymku</span></h4>
-                <p class="text-white-50 small">Selamat datang kembali!</p>
+                <i class="bi bi-trophy-fill text-danger" style="font-size: 2.5rem;"></i>
+                <h4 class="text-dark fw-bold mt-2">Masuk ke <span class="text-danger">Gymku</span></h4>
+                <p class="text-muted small">Selamat datang kembali!</p>
             </div>
 
-            <!-- Flash message (sukses register, dll.) -->
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
                     <i class="bi bi-check-circle me-1"></i> {{ session('success') }}
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
-            <!-- Card Form -->
-            <div class="card bg-secondary bg-opacity-10 border border-secondary shadow">
+            <div class="card bg-white border-light shadow-sm">
                 <div class="card-body p-4">
 
                     @if ($errors->any())
@@ -32,7 +29,7 @@
                             @foreach ($errors->all() as $error)
                                 {{ $error }}<br>
                             @endforeach
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
 
@@ -40,25 +37,25 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label class="form-label text-warning small">Email</label>
-                            <input type="email" name="email" class="form-control bg-dark text-white border-secondary"
+                            <label class="form-label text-danger small">Email</label>
+                            <input type="email" name="email" class="form-control bg-light text-dark border-light"
                                 placeholder="contoh@email.com" value="{{ old('email') }}" required autofocus>
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label text-warning small">Password</label>
+                            <label class="form-label text-danger small">Password</label>
                             <div class="input-group">
                                 <input type="password" name="password" id="passwordInput"
-                                    class="form-control bg-dark text-white border-secondary" placeholder="••••••••"
+                                    class="form-control bg-light text-dark border-light" placeholder="••••••••"
                                     required>
-                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()"
+                                <button type="button" class="btn btn-outline-secondary border-light bg-light" onclick="togglePassword()"
                                     tabindex="-1">
                                     <i class="bi bi-eye" id="eyeIcon"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-warning fw-bold w-100 text-dark">
+                        <button type="submit" class="btn btn-danger fw-bold w-100">
                             Masuk
                         </button>
 
@@ -67,9 +64,9 @@
                 </div>
             </div>
 
-            <p class="text-center text-white-50 small mt-3">
+            <p class="text-center text-muted small mt-3">
                 Belum punya akun?
-                <a href="{{ route('register') }}" class="text-warning text-decoration-none">Daftar sekarang</a>
+                <a href="{{ route('register') }}" class="text-danger text-decoration-none fw-bold">Daftar sekarang</a>
             </p>
 
         </div>
