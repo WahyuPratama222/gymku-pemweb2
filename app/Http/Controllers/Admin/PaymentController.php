@@ -3,69 +3,68 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Package;
-use App\Models\Registration;
 use App\Models\Payment;
-use Carbon\Carbon;
+use App\Models\Registration;
+use Illuminate\Support\Facades\DB;
 
-class DashboardController extends Controller
+class PaymentController extends Controller
 {
     /**
-     * Display the admin dashboard.
+     * Display list of all payments.
      */
     public function index()
     {
-        // Get dashboard summary statistics
-        $summary = $this->getDashboardSummary();
-
-        // Get pending payments (5 latest)
-        $pendingPayments = $this->getPendingPayments();
-
-        return view('admin.dashboard', compact('summary', 'pendingPayments'));
-    }
-
-    /**
-     * Get dashboard summary statistics
-     */
-    protected function getDashboardSummary()
-    {
-        $today = Carbon::today();
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-
-        return [
-            'total_members' => User::where('role', 'Member')->count(),
-            'active_memberships' => Registration::where('status', 'Active')->count(),
-            'expired_memberships' => Registration::where('status', 'Expired')->count(),
-            'active_packages' => Package::where('status', 'Active')->count(),
-            'income_today' => Payment::paid()
-                ->whereDate('payment_date', $today)
-                ->sum('amount'),
-            'income_this_month' => Payment::paid()
-                ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
-                ->sum('amount'),
-        ];
-    }
-
-    /**
-     * Get pending payments list
-     */
-    protected function getPendingPayments()
-    {
-        return Payment::with(['registration.user', 'registration.package'])
-            ->pending()
+        // Get all payments with related data
+        $payments = Payment::with(['registration.user', 'registration.package'])
             ->latest('payment_date')
-            ->limit(5)
             ->get()
             ->map(function ($payment) {
-                return [
+                return (object) [
                     'id_payment' => $payment->id_payment,
                     'member_name' => $payment->registration->user->name,
+                    'member_email' => $payment->registration->user->email,
                     'package_name' => $payment->registration->package->name,
                     'amount' => $payment->amount,
                     'payment_date' => $payment->payment_date,
+                    'payment_method' => $payment->payment_method,
+                    'payment_status' => $payment->payment_status,
+                    'id_registration' => $payment->id_registration,
                 ];
             });
+
+        return view('admin.payments', compact('payments'));
+    }
+
+    /**
+     * Confirm payment and activate membership.
+     */
+    public function confirm($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $payment = Payment::with('registration')->findOrFail($id);
+
+            // Update payment status to Lunas
+            $payment->update([
+                'payment_status' => 'Lunas',
+            ]);
+
+            // Update registration status to Active
+            $payment->registration->update([
+                'status' => 'Active',
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.payments')
+                ->with('success', 'Pembayaran berhasil dikonfirmasi dan membership diaktifkan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->route('admin.payments')
+                ->with('error', 'Terjadi kesalahan saat konfirmasi pembayaran.');
+        }
     }
 }
