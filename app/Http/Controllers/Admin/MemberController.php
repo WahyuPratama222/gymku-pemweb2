@@ -14,7 +14,7 @@ class MemberController extends Controller
     public function index()
     {
         // Get all members with their latest registration and package info
-        $members = User::where('role', 'Member')
+        $members= User::where('role', 'Member')
             ->with(['registrations' => function ($query) {
                 $query->latest('registration_date');
             }, 'registrations.package'])
@@ -29,14 +29,14 @@ class MemberController extends Controller
                     'email' => $user->email,
                     'gender' => $user->gender,
                     'joined_at' => $user->created_at,
-                    
+
                     // Latest membership data
                     'id_registration' => $latestRegistration?->id_registration,
                     'registration_date' => $latestRegistration?->registration_date,
                     'start_date' => $latestRegistration?->start_date,
                     'expiry_date' => $latestRegistration?->expiry_date,
                     'status' => $latestRegistration?->status,
-                    
+
                     // Package data
                     'id_package' => $latestRegistration?->package?->id_package,
                     'package_name' => $latestRegistration?->package?->name,
@@ -45,6 +45,6 @@ class MemberController extends Controller
                 ];
             });
 
-        return view('admin.members', compact('members'));
+        return view('admin.member', compact('members'));
     }
 }

@@ -42,6 +42,13 @@
                                 <div>
                                     <div class="fw-bold fs-6">{{ $p->name }}</div>
                                     <div class="small text-muted">{{ $p->day_duration }} Hari</div>
+                                    @if ($p->is_premium)
+                                        <span class="badge bg-warning text-dark mt-1">
+                                            <i class="bi bi-star-fill"></i> Premium
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary mt-1">Reguler</span>
+                                    @endif
                                 </div>
                                 @if ($p->status === 'Active')
                                     <span class="badge bg-success">Aktif</span>
@@ -71,6 +78,7 @@
                     </div>
                 </div>
 
+                <!-- Modal Edit -->
                 <div class="modal fade" id="modalEdit{{ $p->id_package }}" tabindex="-1">
                     <div class="modal-dialog">
                         <div class="modal-content bg-white border-0 text-dark">
@@ -99,8 +107,14 @@
                                             value="{{ $p->day_duration }}" min="1" required>
                                     </div>
                                     <div class="mb-3">
+                                        <label class="form-label text-danger small">Kategori Paket</label>
+                                        <select name="is_premium" class="form-select bg-light border-light">
+                                            <option value="0" {{ !$p->is_premium ? 'selected' : '' }}>Reguler</option>
+                                            <option value="1" {{ $p->is_premium ? 'selected' : '' }}>Premium</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
                                         <label class="form-label text-danger small">Status</label>
-                                        <span class="badge bg-success mb-2 d-inline-block">Aktif</span>
                                         <select name="status" class="form-select bg-light border-light">
                                             <option value="Active" {{ $p->status === 'Active' ? 'selected' : '' }}>Aktif</option>
                                             <option value="Inactive" {{ $p->status === 'Inactive' ? 'selected' : '' }}>Nonaktif</option>
@@ -119,6 +133,7 @@
         </div>
     @endif
 
+    <!-- Modal Tambah Paket -->
     <div class="modal fade" id="modalTambahPaket" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content bg-white border-0 text-dark">
@@ -144,6 +159,13 @@
                             <input type="number" name="day_duration"
                                 class="form-control bg-light border-light" placeholder="30" min="1"
                                 required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-danger small">Kategori Paket</label>
+                            <select name="is_premium" class="form-select bg-light border-light">
+                                <option value="0">Reguler</option>
+                                <option value="1">Premium</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-danger small">Status</label>
