@@ -99,7 +99,9 @@
                                 </label>
                             </div>
 
-                        </div><div class="mt-4 p-3 rounded-3 border border-light bg-light">
+                        </div>
+
+                        <div class="mt-4 p-3 rounded-3 border border-light bg-light">
                             <p class="mb-0 small text-muted">
                                 <i class="bi bi-info-circle text-danger me-1"></i>
                                 Status pembayaran awal <strong class="text-danger">Belum Lunas</strong>.
@@ -113,17 +115,24 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card border-0 shadow text-dark h-100 bg-white">
+            <div class="card border-0 shadow text-dark h-100 {{ $package->is_premium ? 'bg-gradient border-warning border-2' : 'bg-white' }}"
+                 style="{{ $package->is_premium ? 'background: linear-gradient(180deg, #fffbf0 0%, #ffffff 100%);' : '' }}">
                 <div class="card-body p-4 d-flex flex-column">
 
+                    @if ($package->is_premium)
+                        <div class="text-center mb-3 p-2 rounded" style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);">
+                            <span class="fw-bold text-dark"><i class="bi bi-gem"></i> PAKET PREMIUM</span>
+                        </div>
+                    @endif
+
                     <h5 class="fw-bold text-dark mb-1">{{ $package->name }}</h5>
-                    <span class="badge bg-danger text-white mb-3" style="width:fit-content;">
+                    <span class="badge {{ $package->is_premium ? 'bg-warning text-dark' : 'bg-danger text-white' }} mb-3" style="width:fit-content;">
                         {{ $totalDays }} Hari {{ $extraDays > 0 ? '(+'.$extraDays.' Hari)' : '' }}
                     </span>
 
                     <div class="mb-3">
                         <span class="text-muted small">Rp</span>
-                        <span class="fs-2 fw-bold text-danger">
+                        <span class="fs-2 fw-bold {{ $package->is_premium ? 'text-warning' : 'text-danger' }}">
                             {{ number_format($totalPrice, 0, ',', '.') }}
                         </span>
                         <span class="text-muted small">/ {{ $totalDays }} hari</span>
@@ -131,35 +140,34 @@
 
                     <hr class="border-light">
 
+                    @php
+                        // Buat array benefit berdasarkan kategori
+                        $checkoutBenefits = [
+                            "Akses gym selama {$totalDays} hari",
+                            "Semua peralatan tersedia",
+                            "Loker & ruang ganti",
+                        ];
+                        
+                        // Tambahan benefit untuk premium
+                        if ($package->is_premium) {
+                            $checkoutBenefits[] = "Konsultasi dengan trainer profesional";
+                            $checkoutBenefits[] = "Program latihan personal";
+                            $checkoutBenefits[] = "Analisis progress bulanan";
+                            $checkoutBenefits[] = "Akses kelas grup eksklusif";
+                        }
+                    @endphp
+
                     <ul class="list-unstyled flex-grow-1 d-flex flex-column gap-2 mb-4">
-                        <li class="d-flex align-items-center gap-2 small text-dark">
-                            <i class="bi bi-check-circle-fill text-danger"></i>
-                            Akses gym selama {{ $totalDays }} hari
-                        </li>
-                        <li class="d-flex align-items-center gap-2 small text-dark">
-                            <i class="bi bi-check-circle-fill text-danger"></i>
-                            Semua peralatan tersedia
-                        </li>
-                        <li class="d-flex align-items-center gap-2 small text-dark">
-                            <i class="bi bi-check-circle-fill text-danger"></i>
-                            Loker & ruang ganti
-                        </li>
-                        @if ($package->day_duration >= 60)
+                        @foreach ($checkoutBenefits as $benefit)
                             <li class="d-flex align-items-center gap-2 small text-dark">
-                                <i class="bi bi-check-circle-fill text-danger"></i>
-                                Konsultasi dengan trainer
+                                <i class="bi bi-check-circle-fill {{ $package->is_premium ? 'text-warning' : 'text-danger' }}"></i>
+                                {{ $benefit }}
                             </li>
-                        @endif
-                        @if ($package->day_duration >= 90)
-                            <li class="d-flex align-items-center gap-2 small text-dark">
-                                <i class="bi bi-check-circle-fill text-danger"></i>
-                                Program latihan personal
-                            </li>
-                        @endif
+                        @endforeach
                     </ul>
 
                     <button type="submit" form="formCheckout"
-                            class="btn btn-danger text-white fw-bold w-100 mb-2 shadow-sm">
+                            class="btn {{ $package->is_premium ? 'btn-warning text-dark' : 'btn-danger text-white' }} fw-bold w-100 mb-2 shadow-sm">
                         <i class="bi bi-lock-fill me-1"></i> Bayar Sekarang
                     </button>
                     <a href="{{ route('member.packages') }}"

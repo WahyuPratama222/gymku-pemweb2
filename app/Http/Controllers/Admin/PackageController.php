@@ -30,6 +30,7 @@ class PackageController extends Controller
             'name' => 'required|string|max:100',
             'price' => 'required|numeric|min:0',
             'day_duration' => 'required|integer|min:1',
+            'is_premium' => 'required|boolean',
             'status' => 'required|in:Active,Inactive',
         ], [
             'name.required' => 'Nama paket wajib diisi.',
@@ -39,6 +40,7 @@ class PackageController extends Controller
             'day_duration.required' => 'Durasi wajib diisi.',
             'day_duration.integer' => 'Durasi harus berupa angka.',
             'day_duration.min' => 'Durasi minimal 1 hari.',
+            'is_premium.required' => 'Kategori paket wajib dipilih.',
             'status.in' => 'Status tidak valid.',
         ]);
 
@@ -51,6 +53,7 @@ class PackageController extends Controller
             'name' => $request->name,
             'price' => $request->price,
             'day_duration' => $request->day_duration,
+            'is_premium' => $request->is_premium,
             'status' => $request->status,
         ]);
 
@@ -69,6 +72,7 @@ class PackageController extends Controller
             'name' => 'required|string|max:100',
             'price' => 'required|numeric|min:0',
             'day_duration' => 'required|integer|min:1',
+            'is_premium' => 'required|boolean',
             'status' => 'required|in:Active,Inactive',
         ], [
             'name.required' => 'Nama paket wajib diisi.',
@@ -78,6 +82,7 @@ class PackageController extends Controller
             'day_duration.required' => 'Durasi wajib diisi.',
             'day_duration.integer' => 'Durasi harus berupa angka.',
             'day_duration.min' => 'Durasi minimal 1 hari.',
+            'is_premium.required' => 'Kategori paket wajib dipilih.',
             'status.in' => 'Status tidak valid.',
         ]);
 
@@ -90,6 +95,7 @@ class PackageController extends Controller
             'name' => $request->name,
             'price' => $request->price,
             'day_duration' => $request->day_duration,
+            'is_premium' => $request->is_premium,
             'status' => $request->status,
         ]);
 
