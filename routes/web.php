@@ -48,6 +48,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     
     // Members
     Route::get('/members', [MemberController::class, 'index'])->name('members');
+    Route::post('/members', [MemberController::class, 'store'])->name('members.store');
     
     // Packages
     Route::get('/packages', [AdminPackageController::class, 'index'])->name('packages');

@@ -14,7 +14,7 @@
             </div>
 
             @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+                <div class="alert alert-success alert-dismissible fade show py-2 small border-0 shadow-sm" role="alert">
                     <i class="bi bi-check-circle me-1"></i> {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -24,7 +24,7 @@
                 <div class="card-body p-4">
 
                     @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
+                        <div class="alert alert-danger alert-dismissible fade show py-2 small border-0 shadow-sm" role="alert">
                             <i class="bi bi-exclamation-circle me-1"></i>
                             @foreach ($errors->all() as $error)
                                 {{ $error }}<br>

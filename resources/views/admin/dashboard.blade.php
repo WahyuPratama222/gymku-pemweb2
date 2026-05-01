@@ -68,6 +68,37 @@
 
     </div>
 
+    <!-- Grafik Row -->
+    <div class="row g-3 mb-4">
+        <!-- Revenue Chart -->
+        <div class="col-lg-6">
+            <div class="card bg-white border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-graph-up me-2"></i>Pendapatan 7 Hari Terakhir
+                    </h6>
+                    <div style="position: relative; height: 250px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Member Growth Chart -->
+        <div class="col-lg-6">
+            <div class="card bg-white border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-people me-2"></i>Pertumbuhan Member (6 Bulan)
+                    </h6>
+                    <div style="position: relative; height: 250px;">
+                        <canvas id="memberGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-3">
 
         <div class="col-md-6">
@@ -136,3 +167,103 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Revenue Chart
+const revenueCtx = document.getElementById('revenueChart');
+if (revenueCtx) {
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: @json($chartData['revenue']['labels']),
+            datasets: [{
+                label: 'Pendapatan (Rp)',
+                data: @json($chartData['revenue']['data']),
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#dc3545',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f8f9fa'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Member Growth Chart
+const memberCtx = document.getElementById('memberGrowthChart');
+if (memberCtx) {
+    new Chart(memberCtx, {
+        type: 'bar',
+        data: {
+            labels: @json($chartData['memberGrowth']['labels']),
+            datasets: [{
+                label: 'Member Baru',
+                data: @json($chartData['memberGrowth']['data']),
+                backgroundColor: 'rgba(220, 53, 69, 0.8)',
+                borderColor: '#dc3545',
+                borderWidth: 1,
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: '#f8f9fa'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+@endpush

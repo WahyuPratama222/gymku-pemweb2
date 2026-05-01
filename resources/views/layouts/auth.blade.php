@@ -19,14 +19,24 @@
         body {
             background-color: #ffffff;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
     </style>
 
     @stack('styles')
 </head>
-<body class="bg-white d-flex flex-column" style="min-height: 100vh;">
+<body class="bg-white">
 
-    <main class="flex-grow-1 d-flex align-items-center justify-content-center">
+    <main>
         @yield('content')
     </main>
 

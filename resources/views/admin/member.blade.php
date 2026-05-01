@@ -10,11 +10,24 @@
             <h4 class="text-danger fw-bold mb-0">Data Member</h4>
             <small class="text-muted">Semua member terdaftar beserta status membership terakhirnya</small>
         </div>
+        <button class="btn btn-danger fw-bold" data-bs-toggle="modal" data-bs-target="#modalTambahMember">
+            <i class="bi bi-person-plus me-1"></i> Daftarkan Member
+        </button>
     </div>
 
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
+            @foreach ($errors->all() as $error)
+                {{ $error }}<br>
+            @endforeach
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
@@ -143,4 +156,54 @@
 
     </div>
 </div>
+
+<!-- Modal Tambah Member -->
+<div class="modal fade" id="modalTambahMember" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-white border-0 text-dark">
+            <div class="modal-header border-light">
+                <h5 class="modal-title fw-bold">Daftarkan Member Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.members.store') }}">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-danger small">Nama Lengkap</label>
+                        <input type="text" name="name" class="form-control bg-light border-light"
+                            placeholder="Nama member" value="{{ old('name') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-danger small">Email</label>
+                        <input type="email" name="email" class="form-control bg-light border-light"
+                            placeholder="email@example.com" value="{{ old('email') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-danger small">Jenis Kelamin</label>
+                        <select name="gender" class="form-select bg-light border-light" required>
+                            <option value="" disabled {{ old('gender') ? '' : 'selected' }}>Pilih Jenis Kelamin</option>
+                            <option value="Laki-Laki" {{ old('gender') == 'Laki-Laki' ? 'selected' : '' }}>Laki-Laki</option>
+                            <option value="Wanita" {{ old('gender') == 'Wanita' ? 'selected' : '' }}>Wanita</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-danger small">Password</label>
+                        <input type="password" name="password" class="form-control bg-light border-light"
+                            placeholder="Min. 8 karakter" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-danger small">Konfirmasi Password</label>
+                        <input type="password" name="password_confirmation" class="form-control bg-light border-light"
+                            placeholder="Ulangi password" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-light">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger fw-bold">Daftarkan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection

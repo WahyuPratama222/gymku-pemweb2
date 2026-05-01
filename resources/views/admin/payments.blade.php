@@ -88,6 +88,37 @@
 
     </div>
 
+    <!-- Grafik Keuangan -->
+    <div class="row g-3 mb-4">
+        <!-- Monthly Revenue Chart -->
+        <div class="col-lg-8">
+            <div class="card bg-white border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-graph-up me-2"></i>Pendapatan Bulanan (12 Bulan Terakhir)
+                    </h6>
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="monthlyRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods Breakdown -->
+        <div class="col-lg-4">
+            <div class="card bg-white border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-pie-chart me-2"></i>Metode Pembayaran
+                    </h6>
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="paymentMethodsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card bg-white border-0 shadow-sm text-dark">
         <div class="card-body px-4 py-2">
 
@@ -210,3 +241,96 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Monthly Revenue Chart
+const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart');
+if (monthlyRevenueCtx) {
+    new Chart(monthlyRevenueCtx, {
+        type: 'line',
+        data: {
+            labels: @json($chartData['monthlyRevenue']['labels']),
+            datasets: [{
+                label: 'Pendapatan (Rp)',
+                data: @json($chartData['monthlyRevenue']['data']),
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#dc3545',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f8f9fa'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + (value / 1000) + 'k';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Payment Methods Chart
+const paymentMethodsCtx = document.getElementById('paymentMethodsChart');
+if (paymentMethodsCtx) {
+    new Chart(paymentMethodsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: @json($chartData['paymentMethods']['labels']),
+            datasets: [{
+                data: @json($chartData['paymentMethods']['data']),
+                backgroundColor: [
+                    'rgba(220, 53, 69, 0.8)',
+                    'rgba(13, 110, 253, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(25, 135, 84, 0.8)',
+                ],
+                borderColor: '#fff',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+@endpush

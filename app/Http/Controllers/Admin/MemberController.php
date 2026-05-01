@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class MemberController extends Controller
 {
@@ -46,5 +49,44 @@ class MemberController extends Controller
             });
 
         return view('admin.member', compact('members'));
+    }
+
+    /**
+     * Store a newly created member.
+     */
+    public function store(Request $request)
+    {
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email|max:100',
+            'gender' => 'required|in:Laki-Laki,Wanita',
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'name.required' => 'Nama wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'gender.required' => 'Jenis kelamin wajib dipilih.',
+            'gender.in' => 'Pilih jenis kelamin yang valid.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        // Create new member
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'gender' => $request->gender,
+            'password' => Hash::make($request->password),
+            'role' => 'Member',
+        ]);
+
+        return redirect()->route('admin.members')->with('success', 'Member berhasil didaftarkan.');
     }
 }

@@ -32,10 +32,16 @@
         <div class="row g-4">
             @foreach ($packages as $index => $pkg)
                 @php 
-                    // Paket premium yang paling populer (prioritas untuk premium, lalu yang tengah)
-                    $isFeatured = $pkg->is_premium && $index === array_search(true, array_column($packages->toArray(), 'is_premium'));
-                    if (!$isFeatured) {
-                        $isFeatured = $index === 1 && !$pkg->is_premium;
+                    // Tentukan apakah paket ini yang paling populer
+                    $isFeatured = false;
+                    
+                    // Premium selalu featured
+                    if ($pkg->is_premium) {
+                        $isFeatured = true;
+                    } 
+                    // Non-premium: cek apakah ini yang paling banyak dibeli
+                    elseif (!$pkg->is_premium && $pkg->id_package === $mostPopularNonPremiumId) {
+                        $isFeatured = true;
                     }
                     
                     // Buat array benefit berdasarkan kategori
@@ -57,14 +63,14 @@
                 
                 <div class="col-md-4">
                     <div class="card text-dark h-100 {{ $pkg->is_premium ? 'border-warning border-3 shadow-lg' : 'bg-white shadow-sm border-light' }}"
-                         style="{{ $isFeatured ? 'transform: translateY(-8px); transition: all 0.3s ease;' : '' }}">
+                         style="{{ $isFeatured && !$pkg->is_premium ? 'transform: translateY(-8px); transition: all 0.3s ease;' : '' }}">
 
                         @if ($pkg->is_premium)
                             <div class="text-center py-2 bg-gradient text-white rounded-top"
                                  style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); font-size:.75rem; font-weight:800; color: #000 !important;">
                                 <i class="bi bi-star-fill me-1"></i>✨ PAKET PREMIUM ✨<i class="bi bi-star-fill ms-1"></i>
                             </div>
-                        @elseif ($isFeatured)
+                        @elseif ($isFeatured && !$pkg->is_premium)
                             <div class="text-center py-1 bg-danger text-white rounded-top"
                                  style="font-size:.7rem; font-weight:800;">
                                 ⭐ PALING POPULER
@@ -85,6 +91,12 @@
                                 <div class="mb-2">
                                     <span class="badge bg-warning text-dark border border-warning">
                                         <i class="bi bi-gem"></i> Premium Package
+                                    </span>
+                                </div>
+                            @elseif ($isFeatured && !$pkg->is_premium)
+                                <div class="mb-2">
+                                    <span class="badge bg-danger text-white">
+                                        <i class="bi bi-fire"></i> {{ $pkg->registrations_count }} Member Memilih
                                     </span>
                                 </div>
                             @endif
