@@ -20,9 +20,23 @@ class PackageController extends Controller
     public function index()
     {
         // Menggunakan scope active() yang sudah diperbaiki di model
-        $packages = Package::active()->orderBy('price', 'asc')->get();
+        $packages = Package::active()
+            ->withCount(['registrations' => function ($query) {
+                $query->where('status', '!=', 'Cancelled');
+            }])
+            ->orderBy('price', 'asc')
+            ->get();
 
-        return view('member.packages', compact('packages'));
+        // Tentukan paket paling populer (non-premium dengan registrations terbanyak)
+        $mostPopularNonPremiumId = Package::active()
+            ->where('is_premium', false)
+            ->withCount(['registrations' => function ($query) {
+                $query->where('status', '!=', 'Cancelled');
+            }])
+            ->orderBy('registrations_count', 'desc')
+            ->first()?->id_package;
+
+        return view('member.packages', compact('packages', 'mostPopularNonPremiumId'));
     }
 
     /**

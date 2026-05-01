@@ -23,7 +23,10 @@ class DashboardController extends Controller
         // Get pending payments (5 latest)
         $pendingPayments = $this->getPendingPayments();
 
-        return view('admin.dashboard', compact('summary', 'pendingPayments'));
+        // Get data for charts
+        $chartData = $this->getChartData();
+
+        return view('admin.dashboard', compact('summary', 'pendingPayments', 'chartData'));
     }
 
     /**
@@ -68,5 +71,73 @@ class DashboardController extends Controller
                     'payment_date' => $payment->payment_date,
                 ];
             });
+    }
+
+    /**
+     * Get chart data for dashboard
+     */
+    protected function getChartData()
+    {
+        // Revenue chart - last 7 days
+        $revenueData = $this->getRevenueChartData();
+        
+        // Member growth chart - last 6 months
+        $memberGrowthData = $this->getMemberGrowthData();
+
+        return [
+            'revenue' => $revenueData,
+            'memberGrowth' => $memberGrowthData,
+        ];
+    }
+
+    /**
+     * Get revenue data for last 7 days
+     */
+    protected function getRevenueChartData()
+    {
+        $labels = [];
+        $data = [];
+        
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $labels[] = $date->format('d M');
+            
+            $revenue = Payment::paid()
+                ->whereDate('payment_date', $date->toDateString())
+                ->sum('amount');
+                
+            $data[] = $revenue;
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data,
+        ];
+    }
+
+    /**
+     * Get member growth data for last 6 months
+     */
+    protected function getMemberGrowthData()
+    {
+        $labels = [];
+        $data = [];
+        
+        for ($i = 5; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $labels[] = $date->format('M Y');
+            
+            $count = User::where('role', 'Member')
+                ->whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->count();
+                
+            $data[] = $count;
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data,
+        ];
     }
 }
