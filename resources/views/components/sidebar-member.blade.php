@@ -42,12 +42,41 @@ $menuItems = [
                 <div class="text-muted" style="font-size:.7rem;">{{ auth()->user()->email ?? '' }}</div>
             </div>
         </div>
-        <form action="{{ route('logout') }}" method="POST">
+        <form id="logoutForm" action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 fw-bold">
+            <button type="button" class="btn btn-outline-danger btn-sm w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#logoutModal">
                 <i class="bi bi-box-arrow-right me-1"></i>Logout
             </button>
         </form>
     </div>
 
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title fw-bold" id="logoutModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Konfirmasi Logout
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-box-arrow-right text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <h6 class="fw-bold text-dark mb-2">Apakah Anda yakin ingin logout?</h6>
+                <p class="text-muted small mb-0">Anda akan keluar dari akun Gymku dan kembali ke halaman login.</p>
+            </div>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Batal
+                </button>
+                <button type="button" class="btn btn-danger fw-bold" onclick="document.getElementById('logoutForm').submit();">
+                    <i class="bi bi-check-circle me-1"></i>Ya, Logout
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
