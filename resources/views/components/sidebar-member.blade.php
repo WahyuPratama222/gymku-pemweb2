@@ -1,9 +1,12 @@
 @php
+$user = auth()->user();
+$hasPremium = $user && $user->hasPremiumMembership();
+
 $menuItems = [
-    ['route' => 'member.dashboard', 'icon' => 'bi-house-door', 'label' => 'Dashboard'],
-    ['route' => 'member.packages', 'icon' => 'bi-tags', 'label' => 'Paket Gym'],
-    ['route' => 'member.payments', 'icon' => 'bi-receipt', 'label' => 'Riwayat Pembayaran'],
-    ['route' => 'member.progress', 'icon' => 'bi-graph-up-arrow', 'label' => 'Progress Saya'],
+    ['route' => 'member.dashboard', 'icon' => 'bi-house-door', 'label' => 'Dashboard', 'premium' => false],
+    ['route' => 'member.packages', 'icon' => 'bi-tags', 'label' => 'Paket Gym', 'premium' => false],
+    ['route' => 'member.payments', 'icon' => 'bi-receipt', 'label' => 'Riwayat Pembayaran', 'premium' => false],
+    ['route' => 'member.progress', 'icon' => 'bi-graph-up-arrow', 'label' => 'Progress Saya', 'premium' => true],
 ];
 @endphp
 
@@ -19,13 +22,34 @@ $menuItems = [
 
     <ul class="nav nav-pills flex-column px-2 py-3 gap-1 flex-grow-1">
         @foreach ($menuItems as $item)
-            @php $isActive = request()->routeIs($item['route']); @endphp
+            @php
+                $isActive = request()->routeIs($item['route']);
+                $isLocked = ($item['premium'] ?? false) && !$hasPremium;
+            @endphp
             <li class="nav-item">
-                <a href="{{ route($item['route']) }}"
-                    class="nav-link d-flex align-items-center gap-2 {{ $isActive ? 'bg-danger fw-bold text-white shadow-sm' : 'text-dark' }}">
-                    <i class="bi {{ $item['icon'] }} {{ $isActive ? '' : 'text-muted' }}"></i>
-                    {{ $item['label'] }}
-                </a>
+                @if ($isLocked)
+                    {{-- Menu dikunci: tidak bisa diklik, tampil abu-abu --}}
+                    <span class="nav-link d-flex align-items-center gap-2 text-muted opacity-60"
+                          title="Hanya untuk member Premium"
+                          style="cursor: not-allowed;">
+                        <i class="bi {{ $item['icon'] }} text-muted"></i>
+                        {{ $item['label'] }}
+                        <span class="badge bg-warning text-dark ms-auto" style="font-size:.55rem; letter-spacing:.3px;">
+                            <i class="bi bi-lock-fill me-1"></i>Premium
+                        </span>
+                    </span>
+                @else
+                    <a href="{{ route($item['route']) }}"
+                        class="nav-link d-flex align-items-center gap-2 {{ $isActive ? 'bg-danger fw-bold text-white shadow-sm' : 'text-dark' }}">
+                        <i class="bi {{ $item['icon'] }} {{ $isActive ? '' : 'text-muted' }}"></i>
+                        {{ $item['label'] }}
+                        @if (($item['premium'] ?? false) && $hasPremium)
+                            <span class="badge bg-warning text-dark ms-auto" style="font-size:.55rem; letter-spacing:.3px;">
+                                <i class="bi bi-star-fill me-1"></i>Premium
+                            </span>
+                        @endif
+                    </a>
+                @endif
             </li>
         @endforeach
     </ul>

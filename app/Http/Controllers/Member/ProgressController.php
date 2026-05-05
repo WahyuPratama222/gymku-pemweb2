@@ -11,11 +11,22 @@ use Carbon\Carbon;
 
 class ProgressController extends Controller
 {
+    private function checkPremiumAccess()
+    {
+        if (!Auth::user()->hasPremiumMembership()) {
+            return redirect()->route('member.packages')
+                ->with('error', 'Fitur Progress hanya tersedia untuk member dengan paket Premium aktif. Silakan upgrade paket kamu!');
+        }
+        return null;
+    }
+
     /**
      * Display progress tracking page.
      */
     public function index(Request $request)
     {
+        if ($redirect = $this->checkPremiumAccess()) return $redirect;
+
         $user = Auth::user();
 
         // Ambil semua data progress user, urutkan dari terbaru
@@ -77,6 +88,8 @@ class ProgressController extends Controller
      */
     public function store(Request $request)
     {
+        if ($redirect = $this->checkPremiumAccess()) return $redirect;
+
         $user = Auth::user();
 
         $validator = Validator::make($request->all(), [
@@ -120,6 +133,8 @@ class ProgressController extends Controller
      */
     public function destroy($id)
     {
+        if ($redirect = $this->checkPremiumAccess()) return $redirect;
+
         $user = Auth::user();
 
         // Find and delete progress record
