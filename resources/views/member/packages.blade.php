@@ -59,6 +59,9 @@
                         $benefits[] = "Akses kelas grup eksklusif";
                         $benefits[] = "Prioritas booking peralatan";
                     }
+
+                    // Hitung harga per hari di awal
+                    $pricePerDay = ceil($pkg->price / $pkg->day_duration);
                 @endphp
                 
                 <div class="col-md-4">
@@ -107,6 +110,9 @@
                                     {{ number_format($pkg->price, 0, ',', '.') }}
                                 </span>
                                 <span class="text-muted small">/ {{ $pkg->day_duration }} hari</span>
+                                <div class="text-muted" style="font-size: 0.8rem;">
+                                    (Sekitar Rp {{ number_format($pricePerDay, 0, ',', '.') }} / hari)
+                                </div>
                             </div>
 
                             <hr class="border-light">
@@ -123,17 +129,23 @@
                             <form action="{{ route('member.checkout') }}" method="GET">
                                 <input type="hidden" name="id" value="{{ $pkg->id_package }}">
 
-                                @php $pricePerDay = ceil($pkg->price / $pkg->day_duration); @endphp
                                 <div class="mb-3 p-3 rounded {{ $pkg->is_premium ? 'bg-warning bg-opacity-10 border border-warning border-opacity-25' : 'bg-light border border-light' }}">
-                                    <label class="form-label {{ $pkg->is_premium ? 'text-warning' : 'text-danger' }} small fw-bold mb-1">Tambah Hari (Opsional)</label>
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <input type="number" name="extra_days" class="form-control form-control-sm bg-white text-dark border-light shadow-sm"
-                                            min="0" value="0" style="width: 70px;"
-                                            oninput="updateTotal(this, {{ $pkg->price }}, {{ $pricePerDay }}, 'total_display_{{ $pkg->id_package }}')">
-                                        <small class="text-muted">+ Rp {{ number_format($pricePerDay, 0, ',', '.') }} /hari</small>
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-6">
+                                            <label class="form-label {{ $pkg->is_premium ? 'text-warning' : 'text-danger' }} small fw-bold mb-1">Durasi (Bulan)</label>
+                                            <input type="number" name="quantity" class="form-control form-control-sm bg-white text-dark border-light shadow-sm"
+                                                min="{{ $pkg->is_premium ? 1 : 0 }}" value="1" id="qty_{{ $pkg->id_package }}"
+                                                oninput="updateTotalCombined({{ $pkg->id_package }}, {{ $pkg->price }}, {{ $pricePerDay }}, {{ $pkg->is_premium ? 'true' : 'false' }})">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label {{ $pkg->is_premium ? 'text-warning' : 'text-danger' }} small fw-bold mb-1">Tambah Hari</label>
+                                            <input type="number" name="extra_days" class="form-control form-control-sm bg-white text-dark border-light shadow-sm"
+                                                min="0" value="0" id="extra_{{ $pkg->id_package }}"
+                                                oninput="updateTotalCombined({{ $pkg->id_package }}, {{ $pkg->price }}, {{ $pricePerDay }}, {{ $pkg->is_premium ? 'true' : 'false' }})">
+                                        </div>
                                     </div>
                                     <div class="small fw-bold text-dark d-flex justify-content-between align-items-center">
-                                        <span>Total:</span>
+                                        <span>Total Est:</span>
                                         <span id="total_display_{{ $pkg->id_package }}" class="{{ $pkg->is_premium ? 'text-warning' : 'text-danger' }} fs-6">Rp {{ number_format($pkg->price, 0, ',', '.') }}</span>
                                     </div>
                                 </div>
@@ -155,14 +167,25 @@
 
 @push('scripts')
 <script>
-function updateTotal(input, basePrice, pricePerDay, displayId) {
-    let days = parseInt(input.value) || 0;
-    if (days < 0) {
-        days = 0;
-        input.value = 0;
+function updateTotalCombined(pkgId, basePrice, pricePerDay, isPremium) {
+    let qtyInput = document.getElementById('qty_' + pkgId);
+    let extraInput = document.getElementById('extra_' + pkgId);
+    let display = document.getElementById('total_display_' + pkgId);
+
+    let qty = parseInt(qtyInput.value) || 0;
+    let extra = parseInt(extraInput.value) || 0;
+
+    // Proteksi VIP di Frontend
+    if (isPremium && qty < 1) {
+        qty = 1;
+        qtyInput.value = 1;
     }
-    let total = basePrice + (days * pricePerDay);
-    document.getElementById(displayId).innerText = 'Rp ' + total.toLocaleString('id-ID');
+
+    if (qty < 0) { qty = 0; qtyInput.value = 0; }
+    if (extra < 0) { extra = 0; extraInput.value = 0; }
+
+    let total = (basePrice * qty) + (extra * pricePerDay);
+    display.innerText = 'Rp ' + total.toLocaleString('id-ID');
 }
 </script>
 @endpush

@@ -46,19 +46,34 @@ class PackageController extends Controller
     {
         $user = Auth::user();
         $packageId = $request->get('id');
+        $quantity = (int) $request->get('quantity', 1);
         $extraDays = (int) $request->get('extra_days', 0);
 
-        // Get package (sesuai enum di migration: 'Active')
+        // Get package
         $package = Package::where('id_package', $packageId)
             ->where('status', 'Active')
             ->firstOrFail();
 
+        // PROTEKSI VIP: Jika paket premium, minimal harus beli 1 bulan
+        if ($package->is_premium && $quantity < 1) {
+            $quantity = 1;
+        }
+
+        // Pastikan tidak negatif
+        if ($quantity < 0) $quantity = 0;
+        if ($extraDays < 0) $extraDays = 0;
+
+        // Jika keduanya 0, paksa quantity minimal 1 agar tidak error durasi kosong
+        if ($quantity === 0 && $extraDays === 0) {
+            $quantity = 1;
+        }
+
         // Calculate totals
         $pricePerDay = ceil($package->price / $package->day_duration);
-        $totalDays = $package->day_duration + $extraDays;
-        $totalPrice = $package->price + ($extraDays * $pricePerDay);
+        $totalDays = ($package->day_duration * $quantity) + $extraDays;
+        $totalPrice = ($package->price * $quantity) + ($extraDays * $pricePerDay);
 
-        // Check if user already has active membership (sesuai enum di migration: 'Active')
+        // Check if user already has active membership
         $hasActiveMembership = Registration::where('id_user', $user->id_user)
             ->where('status', 'Active')
             ->exists();
@@ -70,9 +85,11 @@ class PackageController extends Controller
 
         return view('member.checkout', compact(
             'package',
+            'quantity',
             'extraDays',
             'totalDays',
-            'totalPrice'
+            'totalPrice',
+            'pricePerDay'
         ));
     }
 
@@ -83,9 +100,10 @@ class PackageController extends Controller
     {
         $user = Auth::user();
 
-        // Validate input
+        // Validate input (quantity sekarang boleh 0)
         $validator = Validator::make($request->all(), [
             'id_package' => 'required|exists:packages,id_package',
+            'quantity' => 'required|integer|min:0',
             'extra_days' => 'required|integer|min:0',
             'start_date' => 'required|date|after_or_equal:today',
             'payment_method' => 'required|in:Transfer Bank,Tunai,QRIS,E-Wallet',
@@ -99,10 +117,22 @@ class PackageController extends Controller
         $package = Package::findOrFail($request->id_package);
 
         // Calculate totals
+        $quantity = (int) $request->quantity;
         $extraDays = (int) $request->extra_days;
+
+        // PROTEKSI VIP: Jika paket premium, minimal harus beli 1 bulan
+        if ($package->is_premium && $quantity < 1) {
+            return back()->with('error', 'Paket Premium minimal harus dibeli untuk durasi 1 bulan.')->withInput();
+        }
+
+        if ($quantity === 0 && $extraDays === 0) {
+            return back()->with('error', 'Durasi pembelian tidak boleh kosong. Silakan pilih bulan atau tambah hari.')->withInput();
+        }
+
         $pricePerDay = ceil($package->price / $package->day_duration);
-        $totalDays = $package->day_duration + $extraDays;
-        $totalPrice = $package->price + ($extraDays * $pricePerDay);
+        
+        $totalDays = ($package->day_duration * $quantity) + $extraDays;
+        $totalPrice = ($package->price * $quantity) + ($extraDays * $pricePerDay);
 
         // Calculate expiry date
         $startDate = Carbon::parse($request->start_date);
