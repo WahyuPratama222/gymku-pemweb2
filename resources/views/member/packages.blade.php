@@ -20,8 +20,21 @@
     @endif
 
     @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
+        <div class="alert alert-dismissible fade show border-0 shadow-sm" role="alert"
+             style="background: linear-gradient(135deg, #fff3cd 0%, #fff8e7 100%); border-left: 4px solid #ffc107 !important; border-left-style: solid !important;">
+            <div class="d-flex align-items-start gap-3">
+                <div class="flex-shrink-0">
+                    <span class="badge bg-warning text-dark p-2 rounded-3">
+                        <i class="bi bi-lock-fill fs-5"></i>
+                    </span>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark mb-1">
+                        <i class="bi bi-star-fill text-warning me-1"></i>Fitur Premium Diperlukan
+                    </div>
+                    <div class="text-muted small">{{ session('error') }}</div>
+                </div>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
