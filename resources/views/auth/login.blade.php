@@ -7,6 +7,10 @@
     <div class="row justify-content-center">
         <div class="col-md-5 col-lg-4">
 
+            <a href="{{ route('home') }}" class="text-danger text-decoration-none fw-bold small d-inline-block mb-3">
+                <i class="bi bi-arrow-left me-1"></i>Kembali
+            </a>
+
             <div class="text-center mb-4">
                 <i class="bi bi-trophy-fill text-danger" style="font-size: 2.5rem;"></i>
                 <h4 class="text-dark fw-bold mt-2">Masuk ke <span class="text-danger">Gymku</span></h4>
