@@ -31,6 +31,13 @@
         </div>
     @endif
 
+    @if ($errors->has('general'))
+        <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ $errors->first('general') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     {{-- BAGIAN GRAFIK & STATISTIK --}}
     @if (!empty($allRows) && count($allRows) > 0)
         {{-- Grafik Progress --}}
@@ -105,40 +112,126 @@
                             ['key' => 'body_fat', 'label' => 'Body Fat', 'unit' => '%', 'icon' => 'bi-droplet-fill'],
                             ['key' => 'muscle_mass', 'label' => 'Muscle Mass', 'unit' => 'kg', 'icon' => 'bi-lightning-fill'],
                         ];
+
+                        // Hitung BMI latest & baseline
+                        $bmiLatest   = ($latest->weight && $latest->height)
+                            ? $latest->weight / (($latest->height / 100) ** 2) : null;
+                        $bmiBaseline = ($baseline->weight && $baseline->height)
+                            ? $baseline->weight / (($baseline->height / 100) ** 2) : null;
+
+                        $bmiCategoryFn = function($bmi) {
+                            if ($bmi === null) return ['label' => '-', 'class' => 'text-muted'];
+                            if ($bmi < 18.5) return ['label' => 'Kurus', 'class' => 'text-info'];
+                            if ($bmi < 25.0) return ['label' => 'Normal', 'class' => 'text-success'];
+                            if ($bmi < 30.0) return ['label' => 'Gemuk', 'class' => 'text-warning'];
+                            return ['label' => 'Obesitas', 'class' => 'text-danger'];
+                        };
+
+                        $bmiDelta    = ($bmiLatest && $bmiBaseline) ? $bmiLatest - $bmiBaseline : null;
+                        $bmiCatNew   = $bmiCategoryFn($bmiLatest);
+                        $bmiTextClass = 'text-dark';
+                        if ($bmiDelta !== null) {
+                            $bmiTextClass = $bmiDelta > 0 ? 'text-success' : ($bmiDelta < 0 ? 'text-danger' : 'text-dark');
+                        }
                     @endphp
 
-                    <div class="row g-3">
-                        @foreach ($metrics as $m)
-                            @php
-                                $newVal = $latest->{$m['key']};
-                                $oldVal = $baseline->{$m['key']};
-                                $delta = ($newVal && $oldVal) ? $newVal - $oldVal : null;
+                    @php
+                        // Helper untuk hitung delta & textClass
+                        $card = function($key, $unit) use ($latest, $baseline) {
+                            $newVal = $latest->{$key};
+                            $oldVal = $baseline->{$key};
+                            $delta  = ($newVal && $oldVal) ? $newVal - $oldVal : null;
+                            $textClass = 'text-dark';
+                            if ($delta > 0) $textClass = 'text-success';
+                            elseif ($delta < 0) $textClass = 'text-danger';
+                            return [
+                                'newVal'    => $newVal,
+                                'oldVal'    => $oldVal,
+                                'delta'     => $delta,
+                                'textClass' => $textClass,
+                                'formatted' => $delta !== null ? ($delta > 0 ? '+' : '') . number_format($delta, 1) . ' ' . $unit : '-',
+                            ];
+                        };
 
-                                $textClass = 'text-dark';
-                                if ($delta > 0) {
-                                    $textClass = 'text-success';
-                                } elseif ($delta < 0) {
-                                    $textClass = 'text-danger';
-                                }
+                        $cWeight = $card('weight', 'kg');
+                        $cHeight = $card('height', 'cm');
+                        $cBf     = $card('body_fat', '%');
+                        $cMm     = $card('muscle_mass', 'kg');
+                    @endphp
 
-                                $formattedDelta = $delta !== null ? ($delta > 0 ? '+' : '') . number_format($delta, 1) . ' ' . $m['unit'] : '-';
-                            @endphp
+                    <div class="row g-3 row-cols-2 row-cols-md-5">
 
-                            <div class="col-6 col-md-3">
-                                <div class="text-center p-3 rounded bg-light border border-light">
-                                    <div class="mb-2">
-                                        <i class="bi {{ $m['icon'] }} text-danger fs-5"></i>
-                                    </div>
-                                    <div class="small text-muted mb-2">{{ $m['label'] }}</div>
-                                    <div class="h5 fw-bold {{ $textClass }} mb-1">{{ $formattedDelta }}</div>
-                                    <div class="small text-muted" style="font-size: 0.75rem;">
-                                        {{ $oldVal ? number_format($oldVal, 1) : '-' }}
-                                        <i class="bi bi-chevron-right mx-1"></i>
-                                        {{ $newVal ? number_format($newVal, 1) : '-' }}
-                                    </div>
+                        {{-- 1. Berat Badan --}}
+                        <div class="col">
+                            <div class="text-center p-3 rounded bg-light border border-light h-100">
+                                <div class="mb-2"><i class="bi bi-speedometer2 text-danger fs-5"></i></div>
+                                <div class="small text-muted mb-2">Berat Badan</div>
+                                <div class="h5 fw-bold {{ $cWeight['textClass'] }} mb-1">{{ $cWeight['formatted'] }}</div>
+                                <div class="small text-muted" style="font-size:0.75rem;">
+                                    {{ $cWeight['oldVal'] ? number_format($cWeight['oldVal'], 1) : '-' }}
+                                    <i class="bi bi-chevron-right mx-1"></i>
+                                    {{ $cWeight['newVal'] ? number_format($cWeight['newVal'], 1) : '-' }}
                                 </div>
                             </div>
-                        @endforeach
+                        </div>
+
+                        {{-- 2. Tinggi Badan --}}
+                        <div class="col">
+                            <div class="text-center p-3 rounded bg-light border border-light h-100">
+                                <div class="mb-2"><i class="bi bi-arrows-vertical text-danger fs-5"></i></div>
+                                <div class="small text-muted mb-2">Tinggi Badan</div>
+                                <div class="h5 fw-bold {{ $cHeight['textClass'] }} mb-1">{{ $cHeight['formatted'] }}</div>
+                                <div class="small text-muted" style="font-size:0.75rem;">
+                                    {{ $cHeight['oldVal'] ? number_format($cHeight['oldVal'], 1) : '-' }}
+                                    <i class="bi bi-chevron-right mx-1"></i>
+                                    {{ $cHeight['newVal'] ? number_format($cHeight['newVal'], 1) : '-' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- 3. BMI (tengah) --}}
+                        <div class="col">
+                            <div class="text-center p-3 rounded border h-100"
+                                 style="background: linear-gradient(135deg, #fff5f5, #fff);">
+                                <div class="mb-2"><i class="bi bi-calculator text-danger fs-5"></i></div>
+                                <div class="small text-muted mb-2 fw-semibold">BMI</div>
+                                <div class="h5 fw-bold {{ $bmiCatNew['class'] }} mb-1">
+                                    {{ $bmiLatest ? number_format($bmiLatest, 1) : '-' }}
+                                </div>
+                                <div class="small {{ $bmiCatNew['class'] }} fw-semibold" style="font-size:0.8rem;">
+                                    {{ $bmiCatNew['label'] }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- 4. Body Fat --}}
+                        <div class="col">
+                            <div class="text-center p-3 rounded bg-light border border-light h-100">
+                                <div class="mb-2"><i class="bi bi-droplet-fill text-danger fs-5"></i></div>
+                                <div class="small text-muted mb-2">Body Fat</div>
+                                <div class="h5 fw-bold {{ $cBf['textClass'] }} mb-1">{{ $cBf['formatted'] }}</div>
+                                <div class="small text-muted" style="font-size:0.75rem;">
+                                    {{ $cBf['oldVal'] ? number_format($cBf['oldVal'], 1) : '-' }}
+                                    <i class="bi bi-chevron-right mx-1"></i>
+                                    {{ $cBf['newVal'] ? number_format($cBf['newVal'], 1) : '-' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- 5. Muscle Mass --}}
+                        <div class="col">
+                            <div class="text-center p-3 rounded bg-light border border-light h-100">
+                                <div class="mb-2"><i class="bi bi-lightning-fill text-danger fs-5"></i></div>
+                                <div class="small text-muted mb-2">Muscle Mass</div>
+                                <div class="h5 fw-bold {{ $cMm['textClass'] }} mb-1">{{ $cMm['formatted'] }}</div>
+                                <div class="small text-muted" style="font-size:0.75rem;">
+                                    {{ $cMm['oldVal'] ? number_format($cMm['oldVal'], 1) : '-' }}
+                                    <i class="bi bi-chevron-right mx-1"></i>
+                                    {{ $cMm['newVal'] ? number_format($cMm['newVal'], 1) : '-' }}
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -159,6 +252,7 @@
                         <th class="text-danger fw-bold border-light">Tanggal</th>
                         <th class="text-danger fw-bold border-light">Berat (kg)</th>
                         <th class="text-danger fw-bold border-light">Tinggi (cm)</th>
+                        <th class="text-danger fw-bold border-light">BMI</th>
                         <th class="text-danger fw-bold border-light">Body Fat (%)</th>
                         <th class="text-danger fw-bold border-light">Muscle Mass (kg)</th>
                         <th class="text-danger fw-bold text-end border-light">Aksi</th>
@@ -170,6 +264,12 @@
                     @endphp
 
                     @forelse ($displayRows as $r)
+                        @php
+                            $bmi = ($r->weight && $r->height)
+                                ? $r->weight / (($r->height / 100) ** 2)
+                                : null;
+                            $bmiCat = $bmi === null ? null : ($bmi < 18.5 ? ['label'=>'Kurus','bg'=>'bg-info'] : ($bmi < 25 ? ['label'=>'Normal','bg'=>'bg-success'] : ($bmi < 30 ? ['label'=>'Gemuk','bg'=>'bg-warning'] : ['label'=>'Obesitas','bg'=>'bg-danger'])));
+                        @endphp
                         <tr class="border-light">
                             <td>
                                 <div class="fw-semibold">{{ \Carbon\Carbon::parse($r->record_date)->format('d M Y') }}</div>
@@ -178,6 +278,15 @@
                                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10">{{ number_format($r->weight, 1) }} kg</span>
                             </td>
                             <td>{{ $r->height ? number_format($r->height, 1) . ' cm' : '-' }}</td>
+                            <td>
+                                @if ($bmi)
+                                    <span class="badge {{ $bmiCat['bg'] }} text-white">
+                                        {{ number_format($bmi, 1) }} — {{ $bmiCat['label'] }}
+                                    </span>
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>{{ $r->body_fat ? number_format($r->body_fat, 1) . '%' : '-' }}</td>
                             <td>{{ $r->muscle_mass ? number_format($r->muscle_mass, 1) . ' kg' : '-' }}</td>
                             <td class="text-end">
@@ -190,7 +299,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5">
+                        <td colspan="7" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="bi bi-emoji-smile d-block mb-2 text-danger" style="font-size: 2rem;"></i>
                                     <p class="mb-0">Belum ada data progress.</p>
@@ -215,6 +324,9 @@
 </div>
 
 {{-- MODAL CREATE --}}
+@php
+    $isFirstTime = empty($latest);
+@endphp
 <div class="modal fade" id="modalCreate" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
@@ -227,6 +339,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+
                     <div class="mb-3">
                         <label class="form-label text-muted">Tanggal</label>
                         <input type="date" name="record_date" value="{{ date('Y-m-d') }}"
@@ -234,27 +347,74 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label text-muted">Berat Badan (kg) <span class="text-danger">*</span></label>
-                        <input type="number" step="0.1" name="weight"
-                               class="form-control bg-light border-0" required placeholder="Contoh: 70.5">
+                        <label class="form-label text-muted">
+                            Berat Badan (kg)
+                            @if ($isFirstTime)<span class="text-danger">*</span>@endif
+                        </label>
+                        <input type="number" step="0.1" name="weight" id="modalWeight"
+                               class="form-control bg-light border-0"
+                               {{ $isFirstTime ? 'required' : '' }}
+                               placeholder="{{ $isFirstTime ? 'Contoh: 70.5' : number_format($latest->weight, 1) }}"
+                               value="{{ old('weight') }}">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label text-muted">Tinggi Badan (cm) <span class="text-danger">*</span></label>
-                        <input type="number" step="0.1" name="height"
-                            class="form-control bg-light border-0" required placeholder="Contoh: 170.5">
+                        <label class="form-label text-muted">
+                            Tinggi Badan (cm)
+                            @if ($isFirstTime)<span class="text-danger">*</span>@endif
+                        </label>
+                        <input type="number" step="0.1" name="height" id="modalHeight"
+                               class="form-control bg-light border-0"
+                               {{ $isFirstTime ? 'required' : '' }}
+                               placeholder="{{ $isFirstTime ? 'Contoh: 170.5' : number_format($latest->height, 1) }}"
+                               value="{{ old('height') }}">
+                    </div>
+
+                    {{-- Panel BMI Real-time --}}
+                    <div id="bmiPanel" class="d-none mb-3 p-3 rounded bg-light border border-light">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-calculator text-danger"></i>
+                                <span class="small text-muted fw-semibold">BMI Saat Ini</span>
+                            </div>
+                            <div class="text-end">
+                                <span id="bmiValue" class="fw-bold fs-5"></span>
+                                <span id="bmiCategory" class="badge ms-2"></span>
+                            </div>
+                        </div>
+                        <div id="bmiBar" class="mt-2" style="height:6px; border-radius:3px; background:#e9ecef; position:relative;">
+                            <div id="bmiIndicator" style="position:absolute; top:-3px; width:12px; height:12px; border-radius:50%; background:#dc3545; transform:translateX(-50%);"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1" style="font-size:0.65rem; color:#aaa;">
+                            <span>Kurus &lt;18.5</span>
+                            <span>Normal 18.5–25</span>
+                            <span>Gemuk 25–30</span>
+                            <span>Obesitas &gt;30</span>
+                        </div>
                     </div>
 
                     <div class="row">
                         <div class="col-6 mb-3">
-                            <label class="form-label text-muted">Body Fat (%)</label>
+                            <label class="form-label text-muted">
+                                Body Fat (%)
+                                @if ($isFirstTime)<span class="text-danger">*</span>@endif
+                            </label>
                             <input type="number" step="0.1" name="body_fat"
-                                   class="form-control bg-light border-0" placeholder="Opsional">
+                                   class="form-control bg-light border-0"
+                                   {{ $isFirstTime ? 'required' : '' }}
+                                   placeholder="{{ $isFirstTime ? 'Contoh: 15.0' : ($latest->body_fat ? number_format($latest->body_fat, 1) : 'Contoh: 15.0') }}"
+                                   value="{{ old('body_fat') }}">
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label text-muted">Muscle Mass (kg)</label>
+                            <label class="form-label text-muted">
+                                Muscle Mass (kg)
+                                @if ($isFirstTime)<span class="text-danger">*</span>@endif
+                            </label>
                             <input type="number" step="0.1" name="muscle_mass"
-                                   class="form-control bg-light border-0" placeholder="Opsional">
+                                   class="form-control bg-light border-0"
+                                   {{ $isFirstTime ? 'required' : '' }}
+                                   placeholder="{{ $isFirstTime ? 'Contoh: 35.0' : ($latest->muscle_mass ? number_format($latest->muscle_mass, 1) : 'Contoh: 35.0') }}"
+                                   value="{{ old('muscle_mass') }}">
                         </div>
                     </div>
                 </div>
@@ -366,5 +526,58 @@ document.addEventListener('DOMContentLoaded', function() {
     metricSelect.addEventListener('change', updateChart);
     timeSelect.addEventListener('change', updateChart);
 });
+
+// ── Kalkulator BMI Real-time di Modal ──────────────────────────────────────
+(function () {
+    const weightInput = document.getElementById('modalWeight');
+    const heightInput = document.getElementById('modalHeight');
+    const bmiPanel    = document.getElementById('bmiPanel');
+    const bmiValue    = document.getElementById('bmiValue');
+    const bmiCategory = document.getElementById('bmiCategory');
+    const bmiIndicator = document.getElementById('bmiIndicator');
+
+    if (!weightInput || !heightInput) return;
+
+    function calcBMI() {
+        const w = parseFloat(weightInput.value);
+        const h = parseFloat(heightInput.value);
+
+        if (!w || !h || h <= 0) {
+            bmiPanel.classList.add('d-none');
+            return;
+        }
+
+        const bmi = w / ((h / 100) ** 2);
+        bmiPanel.classList.remove('d-none');
+        bmiValue.textContent = bmi.toFixed(1);
+
+        // Kategori & warna
+        let label, color, badgeClass;
+        if (bmi < 18.5) {
+            label = 'Kurus'; color = '#0dcaf0'; badgeClass = 'bg-info text-dark';
+        } else if (bmi < 25) {
+            label = 'Normal'; color = '#198754'; badgeClass = 'bg-success';
+        } else if (bmi < 30) {
+            label = 'Gemuk'; color = '#ffc107'; badgeClass = 'bg-warning text-dark';
+        } else {
+            label = 'Obesitas'; color = '#dc3545'; badgeClass = 'bg-danger';
+        }
+
+        bmiCategory.textContent = label;
+        bmiCategory.className = 'badge ms-2 ' + badgeClass;
+        bmiValue.style.color = color;
+        bmiIndicator.style.background = color;
+
+        // Posisi indikator pada bar (range BMI 10–40 → 0–100%)
+        const pct = Math.min(Math.max((bmi - 10) / 30 * 100, 0), 100);
+        bmiIndicator.style.left = pct + '%';
+    }
+
+    weightInput.addEventListener('input', calcBMI);
+    heightInput.addEventListener('input', calcBMI);
+
+    // Hitung sekali jika ada nilai lama (old input)
+    calcBMI();
+})();
 </script>
 @endpush
