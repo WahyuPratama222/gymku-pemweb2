@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-#[Fillable(['id_user', 'record_date', 'weight', 'height', 'body_fat', 'muscle_mass'])]
 class Progress extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['id_user', 'record_date', 'weight', 'height', 'body_fat', 'muscle_mass'];
+
     protected $table = 'progress';
     protected $primaryKey = 'id_progress';
     public $timestamps = false;

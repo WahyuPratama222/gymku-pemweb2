@@ -92,36 +92,90 @@ class ProgressController extends Controller
 
         $user = Auth::user();
 
-        $validator = Validator::make($request->all(), [
-            'record_date' => 'required|date',
-            'weight' => 'required|numeric|min:0|max:500',
-            'height' => 'required|numeric|min:0|max:300',
-            'body_fat' => 'nullable|numeric|min:0|max:100',
-            'muscle_mass' => 'nullable|numeric|min:0|max:500',
-        ], [
-            'record_date.required' => 'Tanggal wajib diisi.',
-            'weight.required' => 'Berat badan wajib diisi.',
-            'weight.numeric' => 'Berat badan harus berupa angka.',
-            'weight.min' => 'Berat badan tidak boleh negatif.',
-            'weight.max' => 'Berat badan maksimal 500 kg.',
-            'height.required' => 'Tinggi badan wajib diisi.',
-            'height.numeric' => 'Tinggi badan harus berupa angka.',
-            'height.min' => 'Tinggi badan tidak boleh negatif.',
-            'height.max' => 'Tinggi badan maksimal 300 cm.',
-        ]);
+        // Cek apakah sudah ada data progress sebelumnya
+        $latestProgress = Progress::where('id_user', $user->id_user)
+            ->orderBy('record_date', 'desc')
+            ->first();
+
+        $isFirstTime = $latestProgress === null;
+
+        if ($isFirstTime) {
+            // Pertama kali: semua field wajib diisi
+            $rules = [
+                'record_date'  => 'required|date',
+                'weight'       => 'required|numeric|min:0|max:500',
+                'height'       => 'required|numeric|min:0|max:300',
+                'body_fat'     => 'required|numeric|min:0|max:100',
+                'muscle_mass'  => 'required|numeric|min:0|max:500',
+            ];
+            $messages = [
+                'record_date.required'  => 'Tanggal wajib diisi.',
+                'weight.required'       => 'Berat badan wajib diisi.',
+                'weight.numeric'        => 'Berat badan harus berupa angka.',
+                'weight.min'            => 'Berat badan tidak boleh negatif.',
+                'weight.max'            => 'Berat badan maksimal 500 kg.',
+                'height.required'       => 'Tinggi badan wajib diisi.',
+                'height.numeric'        => 'Tinggi badan harus berupa angka.',
+                'height.min'            => 'Tinggi badan tidak boleh negatif.',
+                'height.max'            => 'Tinggi badan maksimal 300 cm.',
+                'body_fat.required'     => 'Body Fat wajib diisi pada input pertama.',
+                'body_fat.numeric'      => 'Body Fat harus berupa angka.',
+                'muscle_mass.required'  => 'Muscle Mass wajib diisi pada input pertama.',
+                'muscle_mass.numeric'   => 'Muscle Mass harus berupa angka.',
+            ];
+        } else {
+            // Sudah ada data: minimal 1 dari 4 field wajib diisi
+            $rules = [
+                'record_date'  => 'required|date',
+                'weight'       => 'nullable|numeric|min:0|max:500',
+                'height'       => 'nullable|numeric|min:0|max:300',
+                'body_fat'     => 'nullable|numeric|min:0|max:100',
+                'muscle_mass'  => 'nullable|numeric|min:0|max:500',
+            ];
+            $messages = [
+                'record_date.required' => 'Tanggal wajib diisi.',
+                'weight.numeric'       => 'Berat badan harus berupa angka.',
+                'weight.min'           => 'Berat badan tidak boleh negatif.',
+                'height.numeric'       => 'Tinggi badan harus berupa angka.',
+                'height.min'           => 'Tinggi badan tidak boleh negatif.',
+                'body_fat.numeric'     => 'Body Fat harus berupa angka.',
+                'muscle_mass.numeric'  => 'Muscle Mass harus berupa angka.',
+            ];
+        }
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
+        // Jika bukan pertama kali, cek minimal 1 field terisi
+        if (!$isFirstTime) {
+            $filled = collect(['weight', 'height', 'body_fat', 'muscle_mass'])
+                ->filter(fn($f) => $request->filled($f))
+                ->count();
+
+            if ($filled === 0) {
+                return back()
+                    ->withErrors(['general' => 'Minimal satu field data tubuh harus diisi.'])
+                    ->withInput();
+            }
+        }
+
+        // Isi field kosong dengan data dari record terakhir
+        $weight      = $request->filled('weight')      ? $request->weight      : $latestProgress?->weight;
+        $height      = $request->filled('height')      ? $request->height      : $latestProgress?->height;
+        $body_fat    = $request->filled('body_fat')    ? $request->body_fat    : $latestProgress?->body_fat;
+        $muscle_mass = $request->filled('muscle_mass') ? $request->muscle_mass : $latestProgress?->muscle_mass;
+
         // Create progress record
         Progress::create([
-            'id_user' => $user->id_user,
+            'id_user'     => $user->id_user,
             'record_date' => $request->record_date,
-            'weight' => $request->weight,
-            'height' => $request->height,
-            'body_fat' => $request->body_fat,
-            'muscle_mass' => $request->muscle_mass,
+            'weight'      => $weight,
+            'height'      => $height,
+            'body_fat'    => $body_fat,
+            'muscle_mass' => $muscle_mass,
         ]);
 
         return redirect()->route('member.progress')
